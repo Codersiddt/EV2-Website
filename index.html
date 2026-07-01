@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EV² — Autonomous ATV</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ─── TOKENS ─── */
+    :root {
+      --bg:        #020206;
+      --bg2:       #07070f;
+      --bg3:       #0c0c1a;
+      --accent:    #00D4FF;
+      --accent-lo: rgba(0,212,255,.12);
+      --accent-gl: rgba(0,212,255,.35);
+      --orange:    #FF6B00;
+      --red:       #FF3030;
+      --white:     #ffffff;
+      --text:      #dde2ef;
+      --dim:       #4a5068;
+      --muted:     #1c1f2e;
+      --ease:      cubic-bezier(.16,1,.3,1);
+    }
+
+    /* ─── RESET ─── */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      cursor: none;
+      overflow-x: hidden;
+    }
+
+    /* ─── CURSOR ─── */
+    #cur-dot  { position:fixed; width:6px; height:6px; background:var(--accent); border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:transform .1s; mix-blend-mode:screen; }
+    #cur-ring { position:fixed; width:30px; height:30px; border:1px solid var(--accent); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:all .12s ease; opacity:.55; }
+    body:hover #cur-dot { transform:translate(-50%,-50%) scale(1); }
+
+    /* ─── LOADER ─── */
+    #loader {
+      position:fixed; inset:0; background:var(--bg); z-index:2000;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      transition: opacity .9s ease, visibility .9s ease;
+    }
+    #loader.out { opacity:0; visibility:hidden; }
+    #loader::after {
+      content:''; position:absolute; inset:0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.05) 2px, rgba(0,0,0,.05) 4px);
+      pointer-events:none;
+    }
+    .ld-logo { font-family:'Orbitron',monospace; font-size:3.5rem; font-weight:900; color:var(--white); letter-spacing:.25em; }
+    .ld-logo sup { color:var(--accent); font-size:.55em; vertical-align:super; }
+    .ld-track { margin-top:2rem; width:180px; height:1px; background:var(--muted); }
+    .ld-bar   { height:100%; width:0%; background:var(--accent); box-shadow:0 0 12px var(--accent); transition:width 1.8s var(--ease); }
+    .ld-txt   { margin-top:1rem; font-family:'Orbitron',monospace; font-size:.5rem; letter-spacing:.45em; color:var(--dim); }
+
+    /* ─── NAV ─── */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:500;
+      padding:1.4rem 3rem; display:flex; align-items:center; justify-content:space-between;
+      background:linear-gradient(to bottom,rgba(2,2,6,.92) 0%,transparent 100%);
+    }
+    .nav-logo { font-family:'Orbitron',monospace; font-size:1.25rem; font-weight:900; color:var(--white); text-decoration:none; letter-spacing:.08em; }
+    .nav-logo sup { color:var(--accent); font-size:.6em; }
+    .nav-links { display:flex; gap:2.5rem; list-style:none; }
+    .nav-links a { font-family:'Orbitron',monospace; font-size:.58rem; letter-spacing:.2em; color:var(--dim); text-decoration:none; transition:color .3s; }
+    .nav-links a:hover { color:var(--accent); }
+    .nav-pill {
+      font-family:'Orbitron',monospace; font-size:.58rem; letter-spacing:.18em;
+      color:var(--accent); border:1px solid var(--accent); padding:.55rem 1.3rem;
+      text-decoration:none; transition:all .3s;
+    }
+    .nav-pill:hover { background:var(--accent); color:var(--bg); box-shadow:0 0 24px var(--accent-gl); }
+
+    /* ─── PAGE 1: HERO ─── */
+    #hero {
+      height:100vh; position:relative; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; overflow:hidden;
+    }
+
+    /* Animated grid */
+    .grid-bg {
+      position:absolute; inset:0; pointer-events:none;
+      background-image:
+        linear-gradient(rgba(0,212,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,.04) 1px, transparent 1px);
+      background-size:55px 55px;
+      mask-image:radial-gradient(ellipse at 50% 60%, black 30%, transparent 75%);
+      animation:grid-drift 8s ease-in-out infinite;
+    }
+    @keyframes grid-drift {
+      0%,100% { background-position:0 0; }
+      50%      { background-position:5px 5px; }
+    }
+
+    /* Floor glow */
+    .floor { position:absolute; bottom:18%; left:50%; transform:translateX(-50%); width:55%; height:1px; background:var(--accent); opacity:.12; box-shadow:0 0 90px 50px var(--accent-gl); filter:blur(1px); }
+
+    /* ─── ATV VIEWER ─── */
+    .atv-wrap {
+      position:relative; width:700px; height:min(430px,52vh);
+      perspective:1400px; cursor:grab; user-select:none;
+      margin-top:1.5rem;
+    }
+    .atv-wrap:active { cursor:grabbing; }
+    .atv-3d {
+      width:100%; height:100%; transform-style:preserve-3d;
+      transform:rotateY(0deg) rotateX(-2deg);
+    }
+    .atv-svg { width:100%; height:100%; filter:drop-shadow(0 0 28px rgba(0,212,255,.32)); }
+
+    /* HUD corners */
+    .hud { position:absolute; inset:-8px; pointer-events:none; }
+    .hc { position:absolute; width:22px; height:22px; border-color:var(--accent); border-style:solid; opacity:.65; }
+    .hc.tl { top:0; left:0;  border-width:2px 0 0 2px; }
+    .hc.tr { top:0; right:0; border-width:2px 2px 0 0; }
+    .hc.bl { bottom:0; left:0;  border-width:0 0 2px 2px; }
+    .hc.br { bottom:0; right:0; border-width:0 2px 2px 0; }
+
+    /* HUD micro labels */
+    .hl { position:absolute; font-family:'Orbitron',monospace; font-size:.48rem; color:var(--accent); letter-spacing:.13em; opacity:.6; }
+    .hl.tl { top:-22px; left:0; }
+    .hl.tr { top:-22px; right:0; }
+    .hl.bl { bottom:-22px; left:0; }
+    .hl.br { bottom:-22px; right:0; }
+
+    /* Stat chips */
+    .chip {
+      position:absolute;
+      background:rgba(0,212,255,.06); border:1px solid rgba(0,212,255,.22);
+      padding:.5rem .85rem; backdrop-filter:blur(10px);
+      animation:chip-float 3.5s ease-in-out infinite;
+    }
+    .chip:nth-child(2) { animation-delay:-1.2s; }
+    .chip:nth-child(3) { animation-delay:-2.4s; }
+    @keyframes chip-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    .chip .cl { font-family:'Orbitron',monospace; font-size:.45rem; color:var(--dim); letter-spacing:.12em; }
+    .chip .cv { font-family:'Orbitron',monospace; font-size:1.05rem; font-weight:700; color:var(--accent); line-height:1.1; }
+    .chip .cu { font-family:'Orbitron',monospace; font-size:.45rem; color:var(--dim); }
+    .chip-1 { left:-130px; top:55px; }
+    .chip-2 { right:-130px; top:70px; }
+    .chip-3 { right:-150px; bottom:55px; }
+
+    /* Hero text */
+    .hero-slogan {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:clamp(2.8rem,7vw,6rem);
+      font-weight:900; line-height:.9;
+      text-align:center; text-transform:uppercase; letter-spacing:.04em;
+      color:var(--white); margin-top:.8rem;
+    }
+    .hero-slogan .ac { color:var(--accent); text-shadow:0 0 50px var(--accent-gl); }
+
+    .hero-tags {
+      margin-top:.6rem;
+      font-family:'Orbitron',monospace; font-size:.6rem;
+      letter-spacing:.35em; color:var(--dim);
+      display:flex; align-items:center; gap:1.2rem;
+    }
+    .dot-sep { width:4px; height:4px; background:var(--accent); border-radius:50%; opacity:.6; flex-shrink:0; }
+
+    /* Explore arrow */
+    .explore {
+      display:flex; flex-direction:column; align-items:center; gap:.6rem;
+      margin-top:1rem;
+      text-decoration:none; font-family:'Orbitron',monospace;
+      font-size:.8rem; font-weight:700; letter-spacing:.45em; color:var(--white);
+      transition:color .3s, text-shadow .3s;
+      background:none; border:none; cursor:none; padding:0;
+      text-shadow: 0 0 18px rgba(0,212,255,.5);
+    }
+    .explore:hover { color:var(--accent); text-shadow: 0 0 30px rgba(0,212,255,.9); }
+    .explore-line { width:1px; height:44px; background:linear-gradient(to bottom,var(--accent),transparent); animation:blink-line 1.6s ease-in-out infinite; }
+    @keyframes blink-line { 0%,100%{opacity:.35} 50%{opacity:1} }
+
+    /* ─── SCAN LINE (global overlay) ─── */
+    body::after {
+      content:''; position:fixed; inset:0; pointer-events:none; z-index:900;
+      background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.018) 2px,rgba(0,0,0,.018) 4px);
+    }
+
+    /* ─── PAGE 2: EXPERIENCE ─── */
+    #experience { background:var(--bg); }
+
+    .exp-head { padding:8rem 3rem 3rem; text-align:center; }
+    .eyebrow { font-family:'Orbitron',monospace; font-size:.58rem; letter-spacing:.4em; color:var(--accent); margin-bottom:.9rem; }
+    .section-title {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:clamp(3.5rem,8vw,7rem); font-weight:900;
+      text-transform:uppercase; line-height:.9; color:var(--white);
+    }
+    .section-title sup { font-size:.35em; vertical-align:super; color:var(--accent); }
+
+    .exp-row {
+      min-height:100vh; display:grid; grid-template-columns:1fr 1fr;
+      align-items:center; gap:4rem; padding:5rem 5rem;
+      border-top:1px solid rgba(255,255,255,.04); position:relative;
+    }
+    .exp-row:nth-child(even) .exp-copy { order:2; }
+    .exp-row:nth-child(even) .exp-vis  { order:1; }
+
+    .exp-num { font-family:'Orbitron',monospace; font-size:5.5rem; font-weight:900; line-height:1; color:transparent; -webkit-text-stroke:1px rgba(0,212,255,.13); margin-bottom:-.8rem; }
+    .exp-heading { font-family:'Barlow Condensed',sans-serif; font-size:clamp(2.2rem,4.5vw,4rem); font-weight:900; text-transform:uppercase; color:var(--white); line-height:.95; margin-bottom:1.2rem; }
+    .exp-body { font-size:.95rem; line-height:1.75; color:var(--dim); max-width:390px; }
+    .exp-badge { display:inline-block; margin-top:1.4rem; font-family:'Orbitron',monospace; font-size:.48rem; letter-spacing:.18em; color:var(--accent); border:1px solid rgba(0,212,255,.3); padding:.35rem .75rem; }
+
+    /* Visual panel */
+    .exp-vis {
+      height:460px; background:var(--bg3); border:1px solid rgba(0,212,255,.09);
+      position:relative; overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .exp-vis::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(0,212,255,.05) 0%,transparent 60%); pointer-events:none; }
+    .exp-vis::after  { content:''; position:absolute; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.07) 3px,rgba(0,0,0,.07) 4px); pointer-events:none; }
+    .vl { position:absolute; font-family:'Orbitron',monospace; font-size:.46rem; letter-spacing:.13em; color:var(--accent); opacity:.55; z-index:2; }
+    .vl.tl{top:.9rem;left:.9rem} .vl.tr{top:.9rem;right:.9rem} .vl.bl{bottom:.9rem;left:.9rem} .vl.br{bottom:.9rem;right:.9rem}
+
+    /* ── FULL-BLEED PHOTO ROWS (Koenigsegg-style) ── */
+    .exp-row.exp-full {
+      display:flex; align-items:flex-end; padding:4.5rem 5rem;
+      grid-template-columns:none; gap:0; overflow:hidden;
+    }
+    .exp-full::before {
+      content:''; position:absolute; inset:0; pointer-events:none; z-index:1;
+      background:
+        linear-gradient(to top,  rgba(2,2,6,.95) 0%, rgba(2,2,6,.5) 38%, rgba(2,2,6,.08) 70%, transparent 100%),
+        linear-gradient(to right, rgba(2,2,6,.55) 0%, transparent 55%);
+    }
+    .exp-full::after { display:none; }
+    .exp-full .exp-photo {
+      position:absolute; inset:0; width:100%; height:130%; top:-15%;
+      object-fit:cover; object-position:center;
+      will-change:transform; z-index:0;
+    }
+    .exp-full .exp-copy {
+      position:relative; z-index:2; max-width:560px;
+      order:1 !important;
+    }
+    .exp-full .exp-copy.right { margin-left:auto; }
+    .exp-full:has(.exp-copy.right)::before {
+      background:
+        linear-gradient(to top,  rgba(2,2,6,.95) 0%, rgba(2,2,6,.5) 38%, rgba(2,2,6,.08) 70%, transparent 100%),
+        linear-gradient(to left, rgba(2,2,6,.55) 0%, transparent 55%);
+    }
+    .exp-full .exp-body { color:rgba(221,226,239,.8); }
+    .exp-full .vl { z-index:3; opacity:.7; font-size:.5rem; }
+    .exp-row.exp-deep { min-height:170vh; }
+    .exp-row.exp-deep .exp-photo { height:150%; top:-25%; }
+
+    /* ─── PAGE 3: PILOT ─── */
+    #pilot {
+      min-height:100vh; display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      padding:8rem 3rem; position:relative;
+      border-top:1px solid rgba(255,255,255,.04);
+    }
+
+    .pilot-title {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:clamp(2.4rem,5.5vw,5.2rem); font-weight:900;
+      text-transform:uppercase; text-align:center; line-height:.95;
+      color:var(--white); max-width:880px; margin-bottom:.8rem;
+    }
+    .pilot-sub {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:clamp(1.6rem,3.5vw,3rem); font-weight:300; font-style:italic;
+      color:var(--accent); text-align:center; margin-bottom:1.5rem;
+    }
+    .pilot-desc { font-size:.95rem; line-height:1.75; color:var(--dim); text-align:center; max-width:560px; margin:0 auto 3rem; }
+
+    /* ─── PRE-ORDER FORM ─── */
+    .order-form {
+      width:100%; max-width:620px;
+      background:var(--bg3); border:1px solid rgba(0,212,255,.12);
+      padding:2.8rem; position:relative; margin-bottom:3rem;
+    }
+    .order-form::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--accent),transparent 70%); }
+
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+    .form-grid .full { grid-column:1/-1; }
+
+    .field { display:flex; flex-direction:column; gap:.5rem; }
+    .field label {
+      font-family:'Orbitron',monospace; font-size:.48rem;
+      letter-spacing:.2em; color:var(--accent); opacity:.75;
+    }
+    .field input, .field select, .field textarea {
+      background:rgba(0,0,0,.35); border:1px solid rgba(0,212,255,.15);
+      color:var(--white); font-family:'Inter',sans-serif; font-size:.9rem;
+      padding:.85rem 1rem; outline:none; width:100%;
+      transition:border-color .25s, box-shadow .25s;
+      -webkit-appearance:none; border-radius:0;
+    }
+    .field select { cursor:pointer; }
+    .field select option { background:var(--bg3); color:var(--white); }
+    .field textarea { resize:none; height:100px; }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color:var(--accent);
+      box-shadow:0 0 18px rgba(0,212,255,.12);
+    }
+    .field input::placeholder, .field textarea::placeholder { color:var(--dim); opacity:.6; }
+
+    .form-submit {
+      margin-top:1.8rem; width:100%;
+      font-family:'Orbitron',monospace; font-size:.65rem; letter-spacing:.22em;
+      color:var(--bg); background:var(--accent); border:none;
+      padding:1.15rem 2rem; cursor:pointer; transition:all .3s;
+      box-shadow:0 0 30px var(--accent-gl);
+    }
+    .form-submit:hover { background:var(--white); box-shadow:0 0 50px rgba(255,255,255,.22); }
+
+    /* Success state */
+    .form-success {
+      display:none; text-align:center; padding:3rem 2rem;
+    }
+    .form-success.show { display:block; }
+    .form-success .checkmark {
+      width:56px; height:56px; border:2px solid var(--accent);
+      border-radius:50%; display:flex; align-items:center; justify-content:center;
+      margin:0 auto 1.5rem; font-size:1.4rem; color:var(--accent);
+      box-shadow:0 0 24px var(--accent-gl);
+    }
+    .form-success h3 {
+      font-family:'Barlow Condensed',sans-serif; font-size:2rem;
+      font-weight:900; text-transform:uppercase; color:var(--white); margin-bottom:.5rem;
+    }
+    .form-success p { font-size:.9rem; color:var(--dim); line-height:1.7; }
+
+    .form-note { font-family:'Orbitron',monospace; font-size:.46rem; letter-spacing:.12em; color:var(--dim); text-align:center; margin-top:1rem; opacity:.6; }
+
+    .site-foot {
+      margin-top:4rem; padding-top:1.8rem;
+      border-top:1px solid rgba(255,255,255,.05);
+      width:100%; max-width:620px;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .foot-logo { font-family:'Orbitron',monospace; font-size:.9rem; font-weight:900; color:var(--dim); }
+    .foot-logo sup { color:var(--accent); }
+    .foot-copy  { font-family:'Orbitron',monospace; font-size:.42rem; letter-spacing:.13em; color:var(--muted); }
+
+    /* ─── SPECS STRIP ─── */
+    #specs {
+      background: #08080e;
+      border-top: 1px solid rgba(0,212,255,.06);
+      border-bottom: 1px solid rgba(0,212,255,.06);
+      padding: 5rem 6rem;
+    }
+    .specs-label {
+      font-family:'Orbitron',monospace; font-size:.52rem;
+      letter-spacing:.4em; color:var(--dim); margin-bottom:3.5rem;
+      display:flex; align-items:center; gap:1.5rem;
+    }
+    .specs-label::after { content:''; flex:1; height:1px; background:rgba(255,255,255,.07); }
+    .specs-grid {
+      display:grid; grid-template-columns:repeat(4,1fr);
+      gap:0;
+    }
+    .spec-item {
+      padding:2rem 2.5rem 2rem 0;
+      border-right:1px solid rgba(255,255,255,.06);
+      position:relative;
+    }
+    .spec-item:last-child { border-right:none; padding-right:0; }
+    .spec-item:not(:first-child) { padding-left:2.5rem; }
+    .spec-num {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:clamp(3.5rem,6vw,6rem); font-weight:900;
+      line-height:1; color:var(--white); display:block;
+      transition: color .3s;
+    }
+    .spec-item:hover .spec-num { color:var(--accent); }
+    .spec-unit {
+      font-family:'Orbitron',monospace; font-size:.55rem;
+      letter-spacing:.2em; color:var(--accent); margin-top:.4rem;
+      display:block;
+    }
+    .spec-desc {
+      font-family:'Inter',sans-serif; font-size:.8rem;
+      color:var(--dim); margin-top:.3rem; line-height:1.4;
+    }
+
+    /* ─── PHILOSOPHY STRIP ─── */
+    #philosophy {
+      position:relative; min-height:60vh;
+      display:flex; align-items:center; justify-content:flex-end;
+      overflow:hidden;
+      background: #030307;
+    }
+    .phil-bg {
+      position:absolute; inset:0;
+      background:
+        linear-gradient(105deg, transparent 45%, rgba(0,212,255,.03) 100%),
+        repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,255,.015) 2px,rgba(0,212,255,.015) 3px),
+        repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(0,212,255,.02) 60px,rgba(0,212,255,.02) 61px);
+    }
+    /* Big ghost text on the left */
+    .phil-ghost {
+      position:absolute; left:-0.02em; top:50%; transform:translateY(-50%);
+      font-family:'Barlow Condensed',sans-serif; font-weight:900;
+      font-size:clamp(8rem,18vw,18rem); line-height:1;
+      color:transparent; -webkit-text-stroke:1px rgba(0,212,255,.08);
+      text-transform:uppercase; user-select:none; pointer-events:none;
+      letter-spacing:-.02em;
+    }
+    .phil-content {
+      position:relative; z-index:2;
+      max-width:520px; margin-right:8vw;
+      padding:5rem 0;
+    }
+    .phil-quote {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:clamp(2rem,3.5vw,3.2rem); font-weight:300; font-style:italic;
+      line-height:1.25; color:var(--white); margin-bottom:2rem;
+    }
+    .phil-quote em { font-style:normal; color:var(--accent); font-weight:700; }
+    .phil-attr {
+      font-family:'Orbitron',monospace; font-size:.5rem;
+      letter-spacing:.3em; color:var(--dim);
+      display:flex; align-items:center; gap:1rem;
+    }
+    .phil-attr::before { content:'—'; color:var(--accent); }
+
+    /* ─── REVEAL ANIMATIONS ─── */
+    .rv, .rvl, .rvr {
+      opacity:0; transition: opacity .85s var(--ease), transform .85s var(--ease);
+    }
+    .rv  { transform:translateY(28px); }
+    .rvl { transform:translateX(-36px); }
+    .rvr { transform:translateX(36px); }
+    .rv.on, .rvl.on, .rvr.on { opacity:1; transform:none; }
+
+    /* ─── PAGE PANEL SYSTEM ─── */
+    body { overflow: hidden; }
+    .page-panel {
+      position: fixed; inset: 0;
+      overflow-y: auto; overflow-x: hidden;
+      z-index: 1;
+      visibility: hidden; opacity: 0; pointer-events: none;
+    }
+    .page-panel.active {
+      visibility: visible; opacity: 1; pointer-events: all; z-index: 2;
+    }
+
+    /* ─── CINEMATIC TRANSITION OVERLAY ─── */
+    #xover {
+      position: fixed; inset: 0; z-index: 750;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 1.2rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.22s ease;
+    }
+    #xover.xo-show { opacity: 1; pointer-events: all; }
+    .xo-logo {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2rem, 4vw, 3rem); font-weight: 900;
+      color: var(--white); letter-spacing: .22em;
+      opacity: 0; transform: scale(.92);
+      transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+    }
+    #xover.xo-show .xo-logo { opacity: 1; transform: scale(1); }
+    .xo-logo sup { color: var(--accent); font-size: .5em; vertical-align: super; }
+    .xo-bar {
+      width: 160px; height: 1px;
+      background: var(--muted);
+      position: relative; overflow: hidden;
+    }
+    .xo-fill {
+      position: absolute; left: 0; top: 0; height: 100%; width: 0;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+      transition: width 0.38s ease 0.18s;
+    }
+    #xover.xo-show .xo-fill { width: 100%; }
+    .xo-status {
+      font-family: 'Orbitron', monospace;
+      font-size: .42rem; letter-spacing: .45em; color: var(--dim);
+      opacity: 0; transition: opacity 0.3s ease 0.1s;
+    }
+    #xover.xo-show .xo-status { opacity: 1; }
+    .xo-scan {
+      position: absolute; left: 0; right: 0; height: 120px;
+      background: linear-gradient(to bottom,
+        transparent 0%, rgba(0,212,255,.04) 40%,
+        rgba(0,212,255,.12) 50%, rgba(0,212,255,.04) 60%, transparent 100%);
+      opacity: 0; transform: translateY(-200%); pointer-events: none;
+    }
+    #xover.xo-exit .xo-scan {
+      opacity: 1;
+      animation: xo-sweep 0.55s cubic-bezier(.4,0,.6,1) forwards;
+    }
+    @keyframes xo-sweep {
+      from { transform: translateY(-200%); }
+      to   { transform: translateY(200vh); }
+    }
+
+    /* ─── EXPERIENCE → RESERVE CTA ─── */
+    .exp-cta {
+      display: flex; justify-content: center;
+      padding: 5rem 2rem 7rem;
+      border-top: 1px solid rgba(255,255,255,.05);
+    }
+    .cta-reserve {
+      font-family: 'Orbitron', monospace; font-size: .62rem;
+      letter-spacing: .22em; color: var(--bg);
+      background: var(--accent); border: none;
+      padding: 1.1rem 2.8rem; cursor: pointer;
+      transition: all .3s; box-shadow: 0 0 30px var(--accent-gl);
+    }
+    .cta-reserve:hover {
+      background: var(--white); box-shadow: 0 0 50px rgba(255,255,255,.18);
+      transform: translateY(-2px);
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media(max-width:900px){
+      .exp-row { grid-template-columns:1fr; padding:3.5rem 1.5rem; min-height:auto; }
+      .exp-row:nth-child(even) .exp-copy { order:1; }
+      .exp-row:nth-child(even) .exp-vis  { order:2; }
+      .exp-vis { height:280px; }
+      .atv-wrap { width:90vw; height:240px; }
+      .chip-1,.chip-2,.chip-3 { display:none; }
+      nav { padding:1rem 1.5rem; }
+      .nav-links { display:none; }
+      .founders { grid-template-columns:1fr; }
+      #specs { padding:3.5rem 1.5rem; }
+      .specs-grid { grid-template-columns:1fr 1fr; gap:2rem; }
+      .spec-item { border-right:none; padding:0 0 1.5rem; border-bottom:1px solid rgba(255,255,255,.06); }
+      .spec-item:last-child { border-bottom:none; }
+      .spec-item:not(:first-child) { padding-left:0; }
+      .phil-content { margin-right:5vw; }
+      .phil-ghost { font-size:clamp(5rem,20vw,10rem); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div id="cur-dot"></div>
+<div id="cur-ring"></div>
+
+<!-- ══════════════════════════════════
+     LOADER
+══════════════════════════════════ -->
+<div id="loader">
+  <div class="ld-logo">EV<sup>2</sup></div>
+  <div class="ld-track"><div class="ld-bar" id="ldBar"></div></div>
+  <div class="ld-txt">INITIALIZING SYSTEMS</div>
+</div>
+
+<!-- ══════════════════════════════════
+     NAV
+══════════════════════════════════ -->
+<nav>
+  <a href="javascript:void(0)" onclick="navigateTo('pg-home')" class="nav-logo">EV<sup>2</sup></a>
+  <ul class="nav-links">
+    <li><a href="javascript:void(0)" onclick="navigateTo('pg-home')">HOME</a></li>
+    <li><a href="javascript:void(0)" onclick="navigateTo('pg-experience')">EXPERIENCE</a></li>
+    <li><a href="javascript:void(0)" onclick="navigateTo('pg-pilot')">PILOT PROGRAM</a></li>
+  </ul>
+  <a href="javascript:void(0)" onclick="navigateTo('pg-pilot')" class="nav-pill">APPLY NOW</a>
+</nav>
+
+
+<!-- ══════════════════════════════════
+     PAGE PANEL 1 — HOME
+══════════════════════════════════ -->
+<div id="pg-home" class="page-panel active">
+
+<section id="hero">
+  <div class="grid-bg"></div>
+  <div class="floor"></div>
+
+  <!-- ATV 3D VIEWER -->
+  <div class="atv-wrap" id="atvWrap">
+    <div class="atv-3d" id="atv3d">
+
+      <!-- HUD FRAME -->
+      <div class="hud">
+        <div class="hc tl"></div><div class="hc tr"></div>
+        <div class="hc bl"></div><div class="hc br"></div>
+        <span class="hl tl">EV² · MODEL X1</span>
+        <span class="hl tr">STATUS: ACTIVE</span>
+        <span class="hl bl">DRAG TO ROTATE</span>
+        <span class="hl br">BUILD: 2025.1</span>
+      </div>
+
+      <!-- THE ATV -->
+      <svg class="atv-svg" viewBox="0 0 800 490" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="gw" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="4" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="gws" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="10" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="sfx" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="20"/>
+          </filter>
+          <radialGradient id="bg-glow" cx="50%" cy="55%" r="50%">
+            <stop offset="0%"   stop-color="#0c0c2a" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#020206" stop-opacity="1"/>
+          </radialGradient>
+          <radialGradient id="hl-l" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#00D4FF" stop-opacity="1"/>
+            <stop offset="30%"  stop-color="#00D4FF" stop-opacity=".5"/>
+            <stop offset="100%" stop-color="#00D4FF" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="hl-r" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#00D4FF" stop-opacity=".95"/>
+            <stop offset="30%"  stop-color="#00D4FF" stop-opacity=".45"/>
+            <stop offset="100%" stop-color="#00D4FF" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- ── ATMOSPHERIC BACKDROP — separates ATV from page background ── -->
+        <ellipse cx="400" cy="310" rx="370" ry="210" fill="url(#bg-glow)"/>
+
+        <!-- ── GROUND GLOW ── -->
+        <ellipse cx="395" cy="468" rx="315" ry="18" fill="#00D4FF" opacity=".08" filter="url(#sfx)"/>
+        <ellipse cx="175" cy="468" rx="125" ry="11" fill="#00D4FF" opacity=".12" filter="url(#sfx)"/>
+        <ellipse cx="608" cy="455" rx="108" ry="10" fill="#00D4FF" opacity=".08" filter="url(#sfx)"/>
+
+        <!-- ── HEADLIGHT CONE BEAMS ── -->
+        <polygon points="308,302 198,490 418,490" fill="#00D4FF" opacity=".06"  filter="url(#sfx)"/>
+        <polygon points="502,288 392,490 612,490" fill="#00D4FF" opacity=".05" filter="url(#sfx)"/>
+
+        <!-- ══ LEFT FRONT WHEEL (closest, largest) ══ -->
+        <circle cx="175" cy="378" r="90" fill="#111132" stroke="#00D4FF" stroke-width="3.5" filter="url(#gw)"/>
+        <circle cx="175" cy="378" r="90" fill="none" stroke="#00D4FF" stroke-width="9"   stroke-dasharray="16 14" opacity=".28"/>
+        <circle cx="175" cy="378" r="90" fill="none" stroke="#00D4FF" stroke-width="4"   stroke-dasharray="8 22" stroke-dashoffset="15" opacity=".14"/>
+        <circle cx="175" cy="378" r="72" fill="none" stroke="#00D4FF" stroke-width="1.5" opacity=".22"/>
+        <circle cx="175" cy="378" r="52" fill="#1a1a40" stroke="#00D4FF" stroke-width="3" filter="url(#gw)"/>
+        <g stroke="#00D4FF" stroke-width="2.5" opacity=".75" filter="url(#gw)">
+          <line x1="175" y1="328" x2="175" y2="352"/> <line x1="175" y1="404" x2="175" y2="428"/>
+          <line x1="125" y1="378" x2="149" y2="378"/> <line x1="201" y1="378" x2="225" y2="378"/>
+          <line x1="140" y1="343" x2="157" y2="360"/> <line x1="193" y1="396" x2="210" y2="413"/>
+          <line x1="210" y1="343" x2="193" y2="360"/> <line x1="157" y1="396" x2="140" y2="413"/>
+        </g>
+        <circle cx="175" cy="378" r="20" fill="#0d0d30" stroke="#00D4FF" stroke-width="2.2" filter="url(#gw)"/>
+        <circle cx="175" cy="378" r="9"  fill="#00D4FF" opacity=".6"/>
+
+        <!-- ══ RIGHT FRONT WHEEL (farther, perspective smaller) ══ -->
+        <circle cx="608" cy="362" r="76" fill="#111132" stroke="#00D4FF" stroke-width="3" filter="url(#gw)"/>
+        <circle cx="608" cy="362" r="76" fill="none"    stroke="#00D4FF" stroke-width="8"   stroke-dasharray="14 12" opacity=".25"/>
+        <circle cx="608" cy="362" r="76" fill="none"    stroke="#00D4FF" stroke-width="3.5" stroke-dasharray="7 19" stroke-dashoffset="12" opacity=".12"/>
+        <circle cx="608" cy="362" r="61" fill="none"    stroke="#00D4FF" stroke-width="1.5" opacity=".18"/>
+        <circle cx="608" cy="362" r="43" fill="#1a1a40" stroke="#00D4FF" stroke-width="2.5" filter="url(#gw)"/>
+        <g stroke="#00D4FF" stroke-width="2.2" opacity=".68" filter="url(#gw)">
+          <line x1="608" y1="320" x2="608" y2="342"/> <line x1="608" y1="382" x2="608" y2="404"/>
+          <line x1="566" y1="362" x2="588" y2="362"/> <line x1="628" y1="362" x2="650" y2="362"/>
+          <line x1="578" y1="332" x2="594" y2="348"/> <line x1="622" y1="376" x2="638" y2="392"/>
+          <line x1="638" y1="332" x2="622" y2="348"/> <line x1="594" y1="376" x2="578" y2="392"/>
+        </g>
+        <circle cx="608" cy="362" r="17" fill="#0d0d30" stroke="#00D4FF" stroke-width="2" filter="url(#gw)"/>
+        <circle cx="608" cy="362" r="7"  fill="#00D4FF" opacity=".55"/>
+
+        <!-- ══ LEFT SIDE PANEL (3/4 depth) ══ -->
+        <path d="M 180 200 L 108 244 L 108 376 L 180 362 Z"
+              fill="#1a1a3c" stroke="#00D4FF" stroke-width="2.5" filter="url(#gw)"/>
+        <line x1="144" y1="272" x2="176" y2="264" stroke="#00D4FF" stroke-width="1" opacity=".35"/>
+        <line x1="144" y1="312" x2="176" y2="304" stroke="#00D4FF" stroke-width=".8" opacity=".22"/>
+
+        <!-- ══ LEFT FRONT FENDER (large arch) ══ -->
+        <path d="M 180 336 Q 146 306 108 318 Q 60 337 56 402 Q 52 455 148 457 Q 265 460 268 380 L 220 368 L 180 362 Z"
+              fill="#181838" stroke="#00D4FF" stroke-width="2.5" filter="url(#gw)"/>
+        <g stroke="#00D4FF" stroke-width="1.2" opacity=".38">
+          <line x1="86" y1="344" x2="108" y2="342"/>
+          <line x1="82" y1="360" x2="104" y2="358"/>
+          <line x1="78" y1="376" x2="100" y2="374"/>
+        </g>
+
+        <!-- ══ RIGHT FRONT FENDER ══ -->
+        <path d="M 636 320 Q 672 296 710 310 Q 754 330 756 392 Q 760 447 664 449 Q 556 451 552 373 L 598 358 L 636 357 Z"
+              fill="#181838" stroke="#00D4FF" stroke-width="2.2" filter="url(#gw)"/>
+
+        <!-- ══ MAIN BODY FRONT FACE ══ -->
+        <path d="M 180 200 L 640 185 L 640 280 L 180 294 Z"
+              fill="#22224a" stroke="#00D4FF" stroke-width="3" filter="url(#gw)"/>
+        <path d="M 180 294 L 640 280 L 640 362 L 180 377 Z"
+              fill="#1c1c42" stroke="#00D4FF" stroke-width="2" opacity=".85"/>
+        <line x1="180" y1="294" x2="640" y2="280" stroke="#00D4FF" stroke-width="1.4" opacity=".45"/>
+        <path d="M 298 200 L 310 218 L 310 294" fill="none" stroke="#00D4FF" stroke-width="1" opacity=".28"/>
+        <path d="M 502 196 L 492 214 L 492 280" fill="none" stroke="#00D4FF" stroke-width="1" opacity=".28"/>
+
+        <!-- ══ HOOD / ROOF ══ -->
+        <path d="M 180 200 L 640 185 L 694 158 L 235 173 Z"
+              fill="#201f48" stroke="#00D4FF" stroke-width="2" opacity=".9"/>
+        <rect x="302" y="162" width="232" height="8" rx="3" fill="#1a1a3e" stroke="#00D4FF" stroke-width="1.2" opacity=".65"/>
+        <line x1="322" y1="170" x2="322" y2="179" stroke="#00D4FF" stroke-width="1.1" opacity=".35"/>
+        <line x1="414" y1="168" x2="414" y2="177" stroke="#00D4FF" stroke-width="1.1" opacity=".35"/>
+        <line x1="506" y1="165" x2="506" y2="174" stroke="#00D4FF" stroke-width="1.1" opacity=".35"/>
+
+        <!-- ══ GRILLE ══ -->
+        <path d="M 288 288 L 532 275 L 532 358 L 288 371 Z"
+              fill="#0e0e28" stroke="#00D4FF" stroke-width="2" opacity=".9"/>
+        <g stroke="#00D4FF" stroke-width="1.4" opacity=".28">
+          <line x1="290" y1="302" x2="531" y2="289"/>
+          <line x1="290" y1="318" x2="531" y2="305"/>
+          <line x1="290" y1="334" x2="531" y2="321"/>
+          <line x1="290" y1="350" x2="531" y2="337"/>
+        </g>
+        <text x="410" y="328" fill="#00D4FF" font-family="monospace" font-weight="900" font-size="14" text-anchor="middle" opacity=".25" letter-spacing="4">EV²</text>
+
+        <!-- ══ LEFT HEADLIGHT — dual-ring LED halo ══ -->
+        <circle cx="308" cy="240" r="90" fill="url(#hl-l)" opacity=".55" filter="url(#sfx)"/>
+        <circle cx="308" cy="240" r="64" fill="#0e0e2e" stroke="#00D4FF" stroke-width="3.5" filter="url(#gw)"/>
+        <circle cx="308" cy="240" r="54" fill="none" stroke="#00D4FF" stroke-width="2" opacity=".62"/>
+        <circle cx="308" cy="240" r="46" fill="none" stroke="#00D4FF" stroke-width="1.2" opacity=".42"/>
+        <circle cx="308" cy="240" r="37" fill="none" stroke="#00D4FF" stroke-width="7" opacity="1" filter="url(#gw)"/>
+        <circle cx="308" cy="240" r="25" fill="#00D4FF" opacity=".15"/>
+        <circle cx="308" cy="240" r="16" fill="#00D4FF" opacity=".35"/>
+        <circle cx="308" cy="240" r="8"  fill="#00D4FF" opacity="1"/>
+        <circle cx="293" cy="225" r="8"  fill="white"   opacity=".22"/>
+        <circle cx="285" cy="218" r="3"  fill="white"   opacity=".12"/>
+        <rect x="256" y="236" width="14" height="3.5" rx="1.75" fill="#00D4FF" opacity=".85"/>
+        <rect x="347" y="234" width="14" height="3.5" rx="1.75" fill="#00D4FF" opacity=".85"/>
+        <rect x="304" y="188" width="3.5" height="14" rx="1.75" fill="#00D4FF" opacity=".65"/>
+
+        <!-- ══ RIGHT HEADLIGHT — same design, perspective-scaled ══ -->
+        <circle cx="502" cy="228" r="78" fill="url(#hl-r)" opacity=".5" filter="url(#sfx)"/>
+        <circle cx="502" cy="228" r="56" fill="#0e0e2e" stroke="#00D4FF" stroke-width="3" filter="url(#gw)"/>
+        <circle cx="502" cy="228" r="47" fill="none" stroke="#00D4FF" stroke-width="1.8" opacity=".58"/>
+        <circle cx="502" cy="228" r="40" fill="none" stroke="#00D4FF" stroke-width="1.1" opacity=".38"/>
+        <circle cx="502" cy="228" r="32" fill="none" stroke="#00D4FF" stroke-width="6.5" opacity="1" filter="url(#gw)"/>
+        <circle cx="502" cy="228" r="21" fill="#00D4FF" opacity=".14"/>
+        <circle cx="502" cy="228" r="13" fill="#00D4FF" opacity=".32"/>
+        <circle cx="502" cy="228" r="6"  fill="#00D4FF" opacity="1"/>
+        <circle cx="489" cy="215" r="7"  fill="white"   opacity=".18"/>
+        <rect x="452" y="224" width="12" height="3.2" rx="1.6" fill="#00D4FF" opacity=".78"/>
+        <rect x="543" y="222" width="12" height="3.2" rx="1.6" fill="#00D4FF" opacity=".78"/>
+        <rect x="498" y="178" width="3.2" height="12" rx="1.6" fill="#00D4FF" opacity=".58"/>
+
+        <!-- ══ FRONT BUMPER ══ -->
+        <path d="M 166 368 L 650 353 L 658 382 L 158 398 Z"
+              fill="#161636" stroke="#00D4FF" stroke-width="2.5"/>
+        <line x1="166" y1="378" x2="650" y2="363" stroke="#00D4FF" stroke-width=".8" opacity=".22"/>
+        <rect x="168" y="368" width="22" height="30" rx="2" fill="#121230" stroke="#00D4FF" stroke-width="1.2" opacity=".75"/>
+        <rect x="638" y="353" width="20" height="28" rx="2" fill="#121230" stroke="#00D4FF" stroke-width="1.1" opacity=".7"/>
+        <rect x="346" y="360" width="126" height="17" rx="3" fill="#0e0e28" stroke="#00D4FF" stroke-width="1.5" opacity=".9"/>
+        <circle cx="364" cy="368.5" r="6" fill="none" stroke="#00D4FF" stroke-width="1.6" opacity=".75"/>
+        <circle cx="458" cy="367.5" r="6" fill="none" stroke="#00D4FF" stroke-width="1.6" opacity=".75"/>
+        <line x1="364" y1="368.5" x2="458" y2="367.5" stroke="#00D4FF" stroke-width="1" opacity=".55"/>
+        <path d="M 406 376 L 406 385 L 418 385" fill="none" stroke="#00D4FF" stroke-width="3" opacity=".65"/>
+
+        <!-- ══ HANDLEBARS ══ -->
+        <rect x="182" y="175" width="30" height="12" rx="5" fill="#00D4FF" opacity=".85" filter="url(#gw)"/>
+        <path d="M 212 181 Q 288 186 326 190" fill="none" stroke="#00D4FF" stroke-width="4.5" opacity=".9" filter="url(#gw)"/>
+        <rect x="372" y="160" width="72" height="32" rx="5" fill="#181838" stroke="#00D4FF" stroke-width="2.2" filter="url(#gw)"/>
+        <rect x="379" y="166" width="58" height="20" rx="3" fill="#101028" stroke="#00D4FF" stroke-width="1.1" opacity=".8"/>
+        <circle cx="395" cy="176" r="5.5" fill="none" stroke="#00D4FF" stroke-width="1.5" opacity=".62"/>
+        <circle cx="421" cy="176" r="5.5" fill="none" stroke="#00D4FF" stroke-width="1.5" opacity=".62"/>
+        <line x1="408" y1="170" x2="408" y2="182" stroke="#00D4FF" stroke-width=".9" opacity=".38"/>
+        <path d="M 444 188 Q 490 186 606 177" fill="none" stroke="#00D4FF" stroke-width="4.5" opacity=".9" filter="url(#gw)"/>
+        <rect x="606" y="170" width="30" height="12" rx="5" fill="#00D4FF" opacity=".85" filter="url(#gw)"/>
+        <line x1="200" y1="183" x2="188" y2="196" stroke="#00D4FF" stroke-width="2.5" opacity=".58"/>
+        <line x1="624" y1="179" x2="636" y2="192" stroke="#00D4FF" stroke-width="2.5" opacity=".55"/>
+
+        <!-- ══ AUTONOMY ANTENNA ══ -->
+        <line x1="408" y1="160" x2="408" y2="82" stroke="#00D4FF" stroke-width="2.5" opacity=".9" filter="url(#gw)"/>
+        <line x1="428" y1="163" x2="428" y2="106" stroke="#00D4FF" stroke-width="1.4" opacity=".45"/>
+        <line x1="388" y1="163" x2="388" y2="108" stroke="#00D4FF" stroke-width="1.4" opacity=".45"/>
+        <line x1="383" y1="108" x2="433" y2="106" stroke="#00D4FF" stroke-width="1.2" opacity=".38"/>
+        <circle cx="408" cy="79" r="7" fill="#00D4FF" opacity="1" filter="url(#gws)"/>
+        <circle cx="408" cy="79" r="7" fill="none" stroke="#00D4FF" stroke-width="1.8">
+          <animate attributeName="r" values="7;28;7" dur="2.4s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="1;0;1" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="408" cy="79" r="7" fill="none" stroke="#00D4FF" stroke-width="1.2">
+          <animate attributeName="r" values="7;44;7" dur="2.4s" begin="0.8s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values=".6;0;.6" dur="2.4s" begin="0.8s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- ══ EV STATUS PANEL ══ -->
+        <rect x="348" y="300" width="120" height="40" rx="3" fill="#0e0e2c" stroke="#00D4FF" stroke-width="1.5" opacity=".9"/>
+        <text x="408" y="314" fill="#00D4FF" font-family="monospace" font-size="6.5" text-anchor="middle" opacity=".65" letter-spacing="2">EV² MODEL X1</text>
+        <rect x="356" y="318" width="16" height="14" rx="2" fill="#00D4FF" opacity=".58"/>
+        <rect x="375" y="318" width="16" height="14" rx="2" fill="#00D4FF" opacity=".50"/>
+        <rect x="394" y="318" width="16" height="14" rx="2" fill="#00D4FF" opacity=".44"/>
+        <rect x="413" y="318" width="16" height="14" rx="2" fill="#00D4FF" opacity=".18"/>
+        <rect x="432" y="318" width="10" height="14" rx="2" fill="#00D4FF" opacity=".09"/>
+        <text x="408" y="344" fill="#00D4FF" font-family="monospace" font-size="5.5" text-anchor="middle" opacity=".42" letter-spacing="3">98% · 200MI</text>
+
+        <!-- ══ TAILLIGHT ══ -->
+        <rect x="640" y="294" width="24" height="11" rx="2" fill="#FF3030" opacity=".95" filter="url(#gw)"/>
+        <rect x="640" y="294" width="24" height="11" rx="2" fill="none" stroke="#FF3030" stroke-width="1"/>
+
+        <!-- ══ SCAN LINE ══ -->
+        <rect x="0" y="0" width="800" height="2" fill="#00D4FF" opacity=".1">
+          <animateTransform attributeName="transform" type="translate" values="0,178;0,425;0,178" dur="4.2s" repeatCount="indefinite"/>
+        </rect>
+
+        <!-- ══ FLOOR REFLECTION ══ -->
+        <line x1="50" y1="478" x2="750" y2="470" stroke="#00D4FF" stroke-width=".7" opacity=".28"/>
+        <ellipse cx="400" cy="480" rx="285" ry="10" fill="#00D4FF" opacity=".06"/>
+      </svg>
+
+      <!-- STAT CHIPS -->
+      <div class="chip chip-1">
+        <div class="cl">MAX RANGE</div>
+        <div class="cv">200<span class="cu"> MI</span></div>
+      </div>
+      <div class="chip chip-2">
+        <div class="cl">0—60 MPH</div>
+        <div class="cv">4.2<span class="cu"> SEC</span></div>
+      </div>
+      <div class="chip chip-3">
+        <div class="cl">AUTONOMY</div>
+        <div class="cv">LVL<span class="cu"> 4</span></div>
+      </div>
+
+    </div><!-- /atv-3d -->
+  </div><!-- /atv-wrap -->
+
+  <!-- EXPLORE -->
+  <button onclick="navigateTo('pg-experience')" class="explore rv">
+    <span>EXPLORE</span>
+    <div class="explore-line"></div>
+  </button>
+
+  <!-- SLOGAN -->
+  <div class="hero-slogan">
+    GO&nbsp;<span class="ac">EV<sup style="font-size:.3em;vertical-align:super">2</sup></span>&nbsp;GO THE DISTANCE
+  </div>
+
+  <!-- TAGLINES -->
+  <div class="hero-tags">
+    <span>ELECTRIC</span>
+    <span class="dot-sep"></span>
+    <span>REMOTE</span>
+    <span class="dot-sep"></span>
+    <span>AUTONOMOUS READY</span>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     SPECS STRIP
+══════════════════════════════════ -->
+<section id="specs">
+  <div class="specs-label">EV² · MODEL X1 SPECIFICATIONS</div>
+  <div class="specs-grid">
+    <div class="spec-item rv">
+      <span class="spec-num">200</span>
+      <span class="spec-unit">MI RANGE</span>
+      <span class="spec-desc">Single charge, all terrain</span>
+    </div>
+    <div class="spec-item rv">
+      <span class="spec-num">4.2</span>
+      <span class="spec-unit">SEC 0–60</span>
+      <span class="spec-desc">Instant electric torque</span>
+    </div>
+    <div class="spec-item rv">
+      <span class="spec-num">LV4</span>
+      <span class="spec-unit">AUTONOMY</span>
+      <span class="spec-desc">Full self-navigation</span>
+    </div>
+    <div class="spec-item rv">
+      <span class="spec-num">48</span>
+      <span class="spec-unit">MS LATENCY</span>
+      <span class="spec-desc">Remote control response</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     PHILOSOPHY STRIP
+══════════════════════════════════ -->
+<section id="philosophy">
+  <div class="phil-bg"></div>
+  <div class="phil-ghost">EV²</div>
+  <div class="phil-content rv">
+    <p class="phil-quote">
+      The terrain doesn't decide where you go.<br>
+      <em>You do.</em>
+    </p>
+    <div class="phil-attr">EV² DESIGN PHILOSOPHY · 2025</div>
+  </div>
+</section>
+
+</div><!-- /pg-home -->
+
+<!-- ══════════════════════════════════
+     PAGE PANEL 2 — EXPERIENCE
+══════════════════════════════════ -->
+<div id="pg-experience" class="page-panel">
+
+<section id="experience">
+
+  <div class="exp-head">
+    <div class="eyebrow">— THE EV² EXPERIENCE —</div>
+    <h2 class="section-title">EXPERIENCE EV<sup>2</sup></h2>
+  </div>
+
+  <!-- 01 · BUILT TO MOVE -->
+  <div class="exp-row exp-full">
+    <img src="atv-road.jpg" alt="EV² ATV on terrain" class="exp-photo exp-parallax">
+    <div class="exp-copy rvl">
+      <div class="exp-num">01</div>
+      <h3 class="exp-heading">BUILT TO MOVE</h3>
+      <p class="exp-body">The EV² doesn't just handle terrain — it dominates it. Torque-vectoring electric motors at each wheel and a ground clearance engineered for the impossible.</p>
+      <span class="exp-badge">TERRAIN INTELLIGENCE SYSTEM</span>
+    </div>
+    <span class="vl tl">TERRAIN: ALL</span>
+    <span class="vl br">SPEED: 45 MPH</span>
+  </div>
+
+  <!-- 02 · FAMILY RIDING -->
+  <div class="exp-row exp-full exp-deep">
+    <img src="atv-aerial.jpg" alt="EV² ATV aerial view" class="exp-photo exp-parallax">
+    <div class="exp-copy rvr right">
+      <div class="exp-num">02</div>
+      <h3 class="exp-heading">MADE FOR EVERYONE</h3>
+      <p class="exp-body">Weekend adventure with the family or solo expedition — EV² scales with you. Fleet sync keeps every rider connected, safe, and on the same path.</p>
+      <span class="exp-badge">FLEET SYNC TECHNOLOGY</span>
+    </div>
+    <span class="vl tl">RIDERS: 2</span>
+    <span class="vl br">FLEET: SYNCED</span>
+  </div>
+
+  <!-- 03 · REMOTE CONTROL -->
+  <div class="exp-row">
+    <div class="exp-copy rvl">
+      <div class="exp-num">03</div>
+      <h3 class="exp-heading">FULL REMOTE CONTROL</h3>
+      <p class="exp-body">Operate your EV² from anywhere with sub-50ms latency. Real-time video, precision steering, full telemetry — your fingertips become the vehicle.</p>
+      <span class="exp-badge">SUB-50MS LATENCY</span>
+    </div>
+    <div class="exp-vis rvr">
+      <svg viewBox="0 0 480 320" fill="none" style="width:100%;height:85%;padding:1.5rem;">
+        <!-- Controller body -->
+        <rect x="135" y="105" width="210" height="115" rx="32" fill="#09091c" stroke="#00D4FF" stroke-width="2"/>
+        <!-- D-pad -->
+        <circle cx="178" cy="163" r="22" fill="none" stroke="#00D4FF" stroke-width="1.4"/>
+        <polygon points="178,141 183,151 173,151" fill="#00D4FF" opacity=".8"/>
+        <polygon points="178,185 183,175 173,175" fill="#00D4FF" opacity=".4"/>
+        <polygon points="156,163 166,158 166,168" fill="#00D4FF" opacity=".4"/>
+        <polygon points="200,163 190,158 190,168" fill="#00D4FF" opacity=".4"/>
+        <!-- Face buttons -->
+        <circle cx="298" cy="148" r="9" fill="#00D4FF" opacity=".58"/>
+        <circle cx="316" cy="165" r="9" fill="#FF6B00" opacity=".58"/>
+        <circle cx="298" cy="182" r="9" fill="#00D4FF" opacity=".28"/>
+        <circle cx="280" cy="165" r="9" fill="#00D4FF" opacity=".28"/>
+        <!-- Bumpers -->
+        <rect x="143" y="93"  width="52" height="13" rx="7" fill="#09091c" stroke="#00D4FF" stroke-width="1.5"/>
+        <rect x="285" y="93"  width="52" height="13" rx="7" fill="#09091c" stroke="#00D4FF" stroke-width="1.5"/>
+        <!-- Signal -->
+        <circle cx="240" cy="52" r="8" fill="#00D4FF" opacity=".9"/>
+        <circle cx="240" cy="52" r="16" fill="none" stroke="#00D4FF" stroke-width=".9" opacity=".5">
+          <animate attributeName="r" values="8;24;8" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values=".5;0;.5" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <line x1="240" y1="60" x2="240" y2="105" stroke="#00D4FF" stroke-width="1" stroke-dasharray="3 3" opacity=".45"/>
+        <text x="240" y="278" fill="#00D4FF" font-family="monospace" font-size="8.5" text-anchor="middle" opacity=".5">LATENCY: 48ms</text>
+      </svg>
+      <span class="vl tl">REMOTE: LIVE</span>
+      <span class="vl br">SIGNAL: STRONG</span>
+    </div>
+  </div>
+
+  <!-- 04 · RETURN TO BASE -->
+  <div class="exp-row">
+    <div class="exp-vis rvl">
+      <svg viewBox="0 0 480 320" fill="none" style="width:100%;height:85%;padding:1.5rem;">
+        <!-- Map grid -->
+        <g stroke="#00D4FF" stroke-width=".5" opacity=".1">
+          <line x1="0"   y1="55"  x2="480" y2="55"/>
+          <line x1="0"   y1="115" x2="480" y2="115"/>
+          <line x1="0"   y1="175" x2="480" y2="175"/>
+          <line x1="0"   y1="235" x2="480" y2="235"/>
+          <line x1="80"  y1="0"   x2="80"  y2="320"/>
+          <line x1="160" y1="0"   x2="160" y2="320"/>
+          <line x1="240" y1="0"   x2="240" y2="320"/>
+          <line x1="320" y1="0"   x2="320" y2="320"/>
+          <line x1="400" y1="0"   x2="400" y2="320"/>
+        </g>
+        <!-- Route path -->
+        <path d="M 95 242 Q 148 218 198 198 Q 248 178 272 148 Q 296 118 325 98 L 362 76"
+              fill="none" stroke="#00D4FF" stroke-width="2" stroke-dasharray="7 3" opacity=".7"/>
+        <!-- Vehicle blip -->
+        <circle cx="198" cy="198" r="9" fill="#00D4FF" opacity=".95"/>
+        <circle cx="198" cy="198" r="9" fill="none" stroke="#00D4FF" stroke-width="1.2">
+          <animate attributeName="r" values="9;24;9" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values=".7;0;.7" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <!-- Base marker -->
+        <polygon points="362,62 372,86 352,86" fill="#00D4FF" opacity=".9"/>
+        <rect x="352" y="86" width="20" height="14" fill="#00D4FF" opacity=".55"/>
+        <text x="378" y="78" fill="#00D4FF" font-family="monospace" font-size="8.5" opacity=".75">BASE</text>
+        <!-- Distance -->
+        <text x="242" y="173" fill="#00D4FF" font-family="monospace" font-size="8" opacity=".55">2.4 MI</text>
+        <!-- Origin -->
+        <circle cx="95" cy="242" r="6" fill="#FF6B00" opacity=".8"/>
+        <text x="74" y="258" fill="#FF6B00" font-family="monospace" font-size="7.5" opacity=".7">START</text>
+      </svg>
+      <span class="vl tl">GPS: ACTIVE</span>
+      <span class="vl br">ETA: 4 MIN</span>
+    </div>
+    <div class="exp-copy rvr">
+      <div class="exp-num">04</div>
+      <h3 class="exp-heading">RETURN TO BASE</h3>
+      <p class="exp-body">One command, one destination. Autonomous navigation routes home through any terrain in real time. Your vehicle finds its own way back — always.</p>
+      <span class="exp-badge">LIDAR · AUTONOMOUS NAV</span>
+    </div>
+  </div>
+
+  <!-- 05 · FUN -->
+  <div class="exp-row">
+    <div class="exp-copy rvl">
+      <div class="exp-num">05</div>
+      <h3 class="exp-heading">PURE FUN, REDEFINED</h3>
+      <p class="exp-body">Maximum performance. Zero emissions. Instant torque that pins you to the seat the moment you open it up. EV² is the best time you've ever had outdoors.</p>
+      <span class="exp-badge">SPORT MODE: UNLEASHED</span>
+    </div>
+    <div class="exp-vis rvr" style="background:linear-gradient(135deg,#080820,#100820);">
+      <svg viewBox="0 0 480 320" fill="none" style="width:100%;height:85%;padding:1.5rem;">
+        <g transform="translate(240,160)">
+          <!-- Radial rays -->
+          <g stroke="#00D4FF" stroke-width="1.6" opacity=".6">
+            <line x1="0"    y1="-115" x2="0"    y2="-80"/>
+            <line x1="81"   y1="-81"  x2="57"   y2="-57"  transform="rotate(0)"/>
+            <line x1="115"  y1="0"    x2="80"   y2="0"    transform="rotate(90)"/>
+            <line x1="81"   y1="81"   x2="57"   y2="57"   transform="rotate(90)"/>
+            <line x1="0"    y1="115"  x2="0"    y2="80"   transform="rotate(180)"/>
+            <line x1="-81"  y1="81"   x2="-57"  y2="57"   transform="rotate(180)"/>
+            <line x1="-115" y1="0"    x2="-80"  y2="0"    transform="rotate(270)"/>
+            <line x1="-81"  y1="-81"  x2="-57"  y2="-57"  transform="rotate(270)"/>
+          </g>
+          <!-- Orange accent rays -->
+          <g stroke="#FF6B00" stroke-width="1" opacity=".35">
+            <line x1="57"   y1="-99"  x2="40"   y2="-70"/>
+            <line x1="99"   y1="-57"  x2="70"   y2="-40"/>
+            <line x1="99"   y1="57"   x2="70"   y2="40"/>
+            <line x1="57"   y1="99"   x2="40"   y2="70"/>
+            <line x1="-57"  y1="99"   x2="-40"  y2="70"/>
+            <line x1="-99"  y1="57"   x2="-70"  y2="40"/>
+            <line x1="-99"  y1="-57"  x2="-70"  y2="-40"/>
+            <line x1="-57"  y1="-99"  x2="-40"  y2="-70"/>
+          </g>
+          <!-- Glow center -->
+          <circle r="35" fill="#00D4FF" opacity=".07"/>
+          <circle r="18" fill="#00D4FF" opacity=".12"/>
+          <circle r="6"  fill="#00D4FF" opacity=".95"/>
+          <!-- EV² -->
+          <text y="5" fill="#00D4FF" font-family="monospace" font-weight="900" font-size="13" text-anchor="middle" letter-spacing="2">EV²</text>
+        </g>
+        <text x="240" y="286" fill="#00D4FF" font-family="monospace" font-size="8.5" text-anchor="middle" opacity=".5" letter-spacing="7">PERFORMANCE · UNLEASHED</text>
+      </svg>
+      <span class="vl tl">MODE: SPORT</span>
+      <span class="vl br">POWER: 100%</span>
+    </div>
+  </div>
+
+  <!-- ── EXPERIENCE → RESERVE CTA ── -->
+  <div class="exp-cta">
+    <button onclick="navigateTo('pg-pilot')" class="cta-reserve rv">RESERVE YOUR EV² →</button>
+  </div>
+
+</section>
+
+</div><!-- /pg-experience -->
+
+
+<!-- ══════════════════════════════════
+     PAGE PANEL 3 — PILOT / PRE-ORDER
+══════════════════════════════════ -->
+<div id="pg-pilot" class="page-panel">
+
+<section id="pilot">
+  <div class="grid-bg" style="opacity:.45;"></div>
+
+  <div class="eyebrow rv">— LIMITED FIRST RUN —</div>
+
+  <h2 class="pilot-title rv">RESERVE YOUR EV²</h2>
+  <p class="pilot-sub rv">We're taking pre-orders now.</p>
+
+  <p class="pilot-desc rv">
+    We're onboarding our first pilot customers. No waitlists, no algorithms — secure your spot in the first production run and help shape the future of autonomous off-road mobility.
+  </p>
+
+  <!-- PRE-ORDER FORM -->
+  <div class="order-form rv" id="orderFormWrap">
+
+    <!-- The form -->
+    <form
+      id="orderForm"
+      action="https://formsubmit.co/durai.guru@gmail.com"
+      method="POST"
+    >
+      <!-- FormSubmit config (hidden) -->
+      <input type="hidden" name="_subject"      value="EV² Pre-Order Application">
+      <input type="hidden" name="_template"     value="table">
+      <input type="hidden" name="_captcha"      value="false">
+      <input type="hidden" name="_autoresponse" value="Thanks for reserving your EV²! We'll be in touch shortly with next steps.">
+
+      <div class="form-grid">
+
+        <div class="field">
+          <label for="fname">FIRST NAME</label>
+          <input id="fname" type="text" name="First Name" placeholder="John" required>
+        </div>
+
+        <div class="field">
+          <label for="lname">LAST NAME</label>
+          <input id="lname" type="text" name="Last Name" placeholder="Smith" required>
+        </div>
+
+        <div class="field">
+          <label for="email">EMAIL ADDRESS</label>
+          <input id="email" type="email" name="Email" placeholder="john@example.com" required>
+        </div>
+
+        <div class="field">
+          <label for="phone">PHONE NUMBER</label>
+          <input id="phone" type="tel" name="Phone" placeholder="+1 (555) 000-0000">
+        </div>
+
+        <div class="field">
+          <label for="location">STATE / COUNTRY</label>
+          <input id="location" type="text" name="Location" placeholder="Texas, USA" required>
+        </div>
+
+        <div class="field">
+          <label for="use">PRIMARY USE</label>
+          <select id="use" name="Primary Use" required>
+            <option value="" disabled selected>Select one</option>
+            <option>Recreation / Adventure</option>
+            <option>Family / Weekend Use</option>
+            <option>Agricultural / Ranch</option>
+            <option>Search &amp; Rescue</option>
+            <option>Commercial / Fleet</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="field full">
+          <label for="why">WHY DO YOU WANT AN EV²?</label>
+          <textarea id="why" name="Message" placeholder="Tell us about your use case or what excites you most..."></textarea>
+        </div>
+
+      </div>
+
+      <button type="submit" class="form-submit">RESERVE MY SPOT →</button>
+    </form>
+
+    <!-- Success message (shown after JS submit) -->
+    <div class="form-success" id="formSuccess">
+      <div class="checkmark">✓</div>
+      <h3>You're In.</h3>
+      <p>Your pre-order request has been received.<br>We'll reach out to <span id="confirmedEmail"></span> within 48 hours.</p>
+    </div>
+
+    <p class="form-note">NO PAYMENT REQUIRED NOW · SPOT SECURED ON SUBMISSION</p>
+  </div>
+
+  <div class="site-foot">
+    <div class="foot-logo">EV<sup>2</sup></div>
+    <div class="foot-copy">© 2025 EV² AUTONOMOUS ATV · ALL RIGHTS RESERVED</div>
+  </div>
+</section>
+
+</div><!-- /pg-pilot -->
+
+<!-- ══════════════════════════════════
+     CINEMATIC TRANSITION OVERLAY
+══════════════════════════════════ -->
+<div id="xover" aria-hidden="true">
+  <div class="xo-logo">EV<sup>2</sup></div>
+  <div class="xo-bar"><div class="xo-fill"></div></div>
+  <div class="xo-status">LOADING</div>
+  <div class="xo-scan"></div>
+</div>
+
+
+<!-- ══════════════════════════════════
+     SCRIPTS
+══════════════════════════════════ -->
+<script>
+/* ── LOADER ── */
+window.addEventListener('load', () => {
+  const bar    = document.getElementById('ldBar');
+  const loader = document.getElementById('loader');
+  setTimeout(() => { bar.style.width = '100%'; }, 80);
+  setTimeout(() => { loader.classList.add('out'); }, 2100);
+  /* Reveal home page elements after loader clears */
+  setTimeout(() => {
+    document.querySelectorAll('#pg-home .rv, #pg-home .rvl, #pg-home .rvr').forEach((el, i) => {
+      setTimeout(() => el.classList.add('on'), i * 60);
+    });
+  }, 2200);
+});
+
+/* ── PAGE NAVIGATION ── */
+function navigateTo(targetId) {
+  const overlay = document.getElementById('xover');
+  const current = document.querySelector('.page-panel.active');
+  const next    = document.getElementById(targetId);
+  if (!next || next === current) return;
+
+  overlay.classList.add('xo-show');
+
+  setTimeout(() => {
+    current.classList.remove('active');
+    next.classList.add('active');
+    next.scrollTop = 0;
+  }, 380);
+
+  setTimeout(() => { overlay.classList.add('xo-exit'); }, 480);
+
+  setTimeout(() => {
+    overlay.classList.remove('xo-show');
+    setTimeout(() => {
+      overlay.classList.remove('xo-exit');
+      /* Animate in elements that haven't revealed yet */
+      const unrevealed = next.querySelectorAll('.rv:not(.on), .rvl:not(.on), .rvr:not(.on)');
+      unrevealed.forEach((el, i) => {
+        setTimeout(() => el.classList.add('on'), 80 + i * 55);
+      });
+    }, 240);
+  }, 680);
+}
+
+/* ── CURSOR ── */
+const dot  = document.getElementById('cur-dot');
+const ring = document.getElementById('cur-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  dot.style.left = mx + 'px';
+  dot.style.top  = my + 'px';
+});
+
+(function loopRing() {
+  rx += (mx - rx) * .11;
+  ry += (my - ry) * .11;
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+  requestAnimationFrame(loopRing);
+})();
+
+document.querySelectorAll('a, button, .atv-wrap').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    dot.style.transform  = 'translate(-50%,-50%) scale(2.5)';
+    ring.style.transform = 'translate(-50%,-50%) scale(1.6)';
+    ring.style.opacity   = '1';
+  });
+  el.addEventListener('mouseleave', () => {
+    dot.style.transform  = 'translate(-50%,-50%) scale(1)';
+    ring.style.transform = 'translate(-50%,-50%) scale(1)';
+    ring.style.opacity   = '.55';
+  });
+});
+
+/* ── ATV DRAG-ROTATE + AUTO-ROTATE ── */
+const wrap    = document.getElementById('atvWrap');
+const atv3d   = document.getElementById('atv3d');
+let dragging  = false;
+let startX    = 0;
+let curRot    = 0;
+let targRot   = 0;
+let autoSpin  = true;
+let autoAngle = 0;
+
+wrap.addEventListener('mousedown', e => {
+  dragging = true; autoSpin = false;
+  startX = e.clientX - curRot * 2;
+});
+document.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  targRot = Math.max(-38, Math.min(38, (e.clientX - startX) / 2));
+});
+document.addEventListener('mouseup', () => {
+  dragging = false;
+  setTimeout(() => { autoSpin = true; }, 2800);
+});
+
+wrap.addEventListener('touchstart', e => {
+  dragging = true; autoSpin = false;
+  startX = e.touches[0].clientX - curRot * 2;
+}, { passive: true });
+document.addEventListener('touchmove', e => {
+  if (!dragging) return;
+  targRot = Math.max(-38, Math.min(38, (e.touches[0].clientX - startX) / 2));
+}, { passive: true });
+document.addEventListener('touchend', () => {
+  dragging = false;
+  setTimeout(() => { autoSpin = true; }, 2800);
+});
+
+(function spinLoop() {
+  if (autoSpin) {
+    autoAngle += .22;
+    targRot = Math.sin(autoAngle * Math.PI / 180) * 22;
+  }
+  curRot += (targRot - curRot) * .07;
+  atv3d.style.transform = `rotateY(${curRot}deg) rotateX(-2deg)`;
+  requestAnimationFrame(spinLoop);
+})();
+
+/* ── SCROLL REVEAL (experience panel — triggers on panel scroll) ── */
+const expPanel = document.getElementById('pg-experience');
+const pilPanel = document.getElementById('pg-pilot');
+[expPanel, pilPanel].forEach(panel => {
+  if (!panel) return;
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((en, i) => {
+      if (en.isIntersecting) {
+        setTimeout(() => en.target.classList.add('on'), i * 70);
+      }
+    });
+  }, { threshold: .1, root: panel });
+  panel.querySelectorAll('.rv, .rvl, .rvr').forEach(el => obs.observe(el));
+});
+
+/* ── PRE-ORDER FORM: AJAX SUBMIT ── */
+const form        = document.getElementById('orderForm');
+const formWrap    = document.getElementById('orderFormWrap');
+const formSuccess = document.getElementById('formSuccess');
+const confirmedEl = document.getElementById('confirmedEmail');
+
+if (form) {
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = form.querySelector('.form-submit');
+    btn.textContent = 'SENDING...';
+    btn.disabled = true;
+
+    const email = form.querySelector('#email').value;
+
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (res.ok || res.status === 200) {
+        form.style.display = 'none';
+        confirmedEl.textContent = email;
+        formSuccess.classList.add('show');
+      } else {
+        btn.textContent = 'TRY AGAIN →';
+        btn.disabled = false;
+      }
+    } catch {
+      /* fallback: let native submit go through */
+      form.submit();
+    }
+  });
+}
+
+/* ── PARALLAX GRID (per-panel scroll) ── */
+document.querySelectorAll('.page-panel').forEach(panel => {
+  panel.addEventListener('scroll', () => {
+    panel.querySelectorAll('.grid-bg').forEach(g => {
+      g.style.transform = `translateY(${panel.scrollTop * .28}px)`;
+    });
+  });
+});
+
+/* ── PARALLAX PHOTOS (full-bleed experience rows) ── */
+expPanel.addEventListener('scroll', () => {
+  expPanel.querySelectorAll('.exp-full').forEach(row => {
+    const img = row.querySelector('.exp-parallax');
+    if (!img) return;
+    const rect = row.getBoundingClientRect();
+    const panRect = expPanel.getBoundingClientRect();
+    const relY = rect.top - panRect.top;
+    img.style.transform = `translateY(${relY * -0.18}px)`;
+  });
+}, { passive: true });
+</script>
+</body>
+</html>
