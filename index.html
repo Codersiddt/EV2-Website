@@ -252,6 +252,71 @@
     .exp-row.exp-deep { min-height:170vh; }
     .exp-row.exp-deep .exp-photo { height:150%; top:-25%; }
 
+    /* ─── PLATFORM SPEC SECTION ─── */
+    .spec-section {
+      padding:7rem 5rem; border-top:1px solid rgba(255,255,255,.05);
+      position:relative;
+    }
+    .spec-section::before {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background:radial-gradient(ellipse 60% 60% at 50% 0%, rgba(0,212,255,.04) 0%, transparent 70%);
+    }
+    .spec-eyebrow {
+      font-family:'Orbitron',monospace; font-size:.52rem; letter-spacing:.3em;
+      color:var(--accent); opacity:.7; margin-bottom:1.2rem;
+    }
+    .spec-title {
+      font-family:'Barlow Condensed',sans-serif; font-size:clamp(2rem,4vw,3.6rem);
+      font-weight:900; text-transform:uppercase; color:var(--white);
+      letter-spacing:.04em; margin-bottom:3.5rem; line-height:1;
+    }
+    .spec-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:0;
+      border:1px solid rgba(0,212,255,.1);
+    }
+    .spec-item {
+      display:flex; align-items:center; gap:1.2rem;
+      padding:1.35rem 2rem; border-bottom:1px solid rgba(0,212,255,.07);
+      border-right:1px solid rgba(0,212,255,.07);
+      transition:background .3s;
+    }
+    .spec-item:hover { background:rgba(0,212,255,.03); }
+    .spec-item:nth-child(even) { border-right:none; }
+    .spec-item:nth-last-child(-n+2) { border-bottom:none; }
+    .spec-dot {
+      width:7px; height:7px; border-radius:50%; flex-shrink:0;
+      background:var(--accent);
+      box-shadow:0 0 8px rgba(0,212,255,.9), 0 0 16px rgba(0,212,255,.4);
+      animation:spec-pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes spec-pulse {
+      0%,100% { opacity:1; box-shadow:0 0 8px rgba(0,212,255,.9),0 0 16px rgba(0,212,255,.4); }
+      50%      { opacity:.5; box-shadow:0 0 4px rgba(0,212,255,.5),0 0 8px rgba(0,212,255,.2); }
+    }
+    .spec-item:nth-child(2) .spec-dot { animation-delay:.3s; }
+    .spec-item:nth-child(3) .spec-dot { animation-delay:.6s; }
+    .spec-item:nth-child(4) .spec-dot { animation-delay:.9s; }
+    .spec-item:nth-child(5) .spec-dot { animation-delay:1.2s; }
+    .spec-item:nth-child(6) .spec-dot { animation-delay:1.5s; }
+    .spec-item:nth-child(7) .spec-dot { animation-delay:1.8s; }
+    .spec-item:nth-child(8) .spec-dot { animation-delay:2.1s; }
+    .spec-label {
+      font-family:'Barlow Condensed',sans-serif; font-size:1.05rem;
+      font-weight:600; text-transform:uppercase; letter-spacing:.06em;
+      color:var(--white); flex:1;
+    }
+    .spec-status {
+      font-family:'Orbitron',monospace; font-size:.42rem; letter-spacing:.18em;
+      color:var(--accent); opacity:.75; white-space:nowrap;
+    }
+    @media(max-width:700px) {
+      .spec-section { padding:4rem 1.5rem; }
+      .spec-grid { grid-template-columns:1fr; }
+      .spec-item:nth-child(even) { border-right:none; }
+      .spec-item:nth-last-child(-n+2) { border-bottom:1px solid rgba(0,212,255,.07); }
+      .spec-item:last-child { border-bottom:none; }
+    }
+
     /* ─── PAGE 3: PILOT ─── */
     #pilot {
       min-height:100vh; display:flex; flex-direction:column;
@@ -1055,6 +1120,54 @@
       </svg>
       <span class="vl tl">MODE: SPORT</span>
       <span class="vl br">POWER: 100%</span>
+    </div>
+  </div>
+
+  <!-- ── PLATFORM SPECIFICATIONS ── -->
+  <div class="spec-section rv">
+    <div class="spec-eyebrow">— SYSTEM OVERVIEW —</div>
+    <h2 class="spec-title">PLATFORM<br>SPECIFICATIONS</h2>
+    <div class="spec-grid">
+      <div class="spec-item rvl">
+        <span class="spec-dot"></span>
+        <span class="spec-label">Remote Operation</span>
+        <span class="spec-status">ENABLED</span>
+      </div>
+      <div class="spec-item rvr">
+        <span class="spec-dot"></span>
+        <span class="spec-label">Return-to-Base</span>
+        <span class="spec-status">ENABLED</span>
+      </div>
+      <div class="spec-item rvl">
+        <span class="spec-dot"></span>
+        <span class="spec-label">OTA Software Updates</span>
+        <span class="spec-status">LIVE</span>
+      </div>
+      <div class="spec-item rvr">
+        <span class="spec-dot"></span>
+        <span class="spec-label">Mobile App Control</span>
+        <span class="spec-status">CONNECTED</span>
+      </div>
+      <div class="spec-item rvl">
+        <span class="spec-dot"></span>
+        <span class="spec-label">Vehicle Diagnostics</span>
+        <span class="spec-status">ACTIVE</span>
+      </div>
+      <div class="spec-item rvr">
+        <span class="spec-dot"></span>
+        <span class="spec-label">Fleet Management Ready</span>
+        <span class="spec-status">READY</span>
+      </div>
+      <div class="spec-item rvl">
+        <span class="spec-dot"></span>
+        <span class="spec-label">Voice Ready</span>
+        <span class="spec-status">STANDBY</span>
+      </div>
+      <div class="spec-item rvr">
+        <span class="spec-dot"></span>
+        <span class="spec-label">Autonomous Ready</span>
+        <span class="spec-status">STANDBY</span>
+      </div>
     </div>
   </div>
 
