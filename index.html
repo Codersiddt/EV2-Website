@@ -108,14 +108,11 @@
       margin-top:.5rem;
     }
     .atv-wrap:active { cursor:grabbing; }
-    .atv-3d {
-      width:100%; height:100%; transform-style:preserve-3d;
-      transform:rotateY(0deg) rotateX(-2deg);
-    }
-    .atv-svg { width:100%; height:100%; filter:drop-shadow(0 0 28px rgba(0,212,255,.32)); }
+    .atv-3d { width:100%; height:100%; position:relative; }
+    #atv-canvas { position:absolute; inset:0; width:100%; height:100%; display:block; z-index:0; }
 
     /* HUD corners */
-    .hud { position:absolute; inset:-8px; pointer-events:none; }
+    .hud { position:absolute; inset:-8px; pointer-events:none; z-index:2; }
     .hc { position:absolute; width:22px; height:22px; border-color:var(--accent); border-style:solid; opacity:.65; }
     .hc.tl { top:0; left:0;  border-width:2px 0 0 2px; }
     .hc.tr { top:0; right:0; border-width:2px 2px 0 0; }
@@ -702,217 +699,7 @@
         <span class="hl br">BUILD: 2025.1</span>
       </div>
 
-      <!-- THE ATV -->
-      <svg class="atv-svg" viewBox="0 0 800 490" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <filter id="gw" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="4" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="gws" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="10" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="sfx" x="-60%" y="-60%" width="220%" height="220%">
-            <feGaussianBlur stdDeviation="20"/>
-          </filter>
-          <radialGradient id="bg-glow" cx="50%" cy="55%" r="50%">
-            <stop offset="0%"   stop-color="#0c0c2a" stop-opacity="1"/>
-            <stop offset="100%" stop-color="#020206" stop-opacity="1"/>
-          </radialGradient>
-          <radialGradient id="hl-l" cx="50%" cy="50%" r="50%">
-            <stop offset="0%"   stop-color="#00D4FF" stop-opacity="1"/>
-            <stop offset="30%"  stop-color="#00D4FF" stop-opacity=".5"/>
-            <stop offset="100%" stop-color="#00D4FF" stop-opacity="0"/>
-          </radialGradient>
-          <radialGradient id="hl-r" cx="50%" cy="50%" r="50%">
-            <stop offset="0%"   stop-color="#00D4FF" stop-opacity=".95"/>
-            <stop offset="30%"  stop-color="#00D4FF" stop-opacity=".45"/>
-            <stop offset="100%" stop-color="#00D4FF" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-
-        <!-- ── ATMOSPHERIC BACKDROP — separates ATV from page background ── -->
-        <ellipse cx="400" cy="310" rx="370" ry="210" fill="url(#bg-glow)"/>
-
-        <!-- ── GROUND GLOW ── -->
-        <ellipse cx="395" cy="468" rx="315" ry="18" fill="#00D4FF" opacity=".08" filter="url(#sfx)"/>
-        <ellipse cx="175" cy="468" rx="125" ry="11" fill="#00D4FF" opacity=".12" filter="url(#sfx)"/>
-        <ellipse cx="608" cy="455" rx="108" ry="10" fill="#00D4FF" opacity=".08" filter="url(#sfx)"/>
-
-        <!-- ── HEADLIGHT CONE BEAMS ── -->
-        <polygon points="308,302 198,490 418,490" fill="#00D4FF" opacity=".06"  filter="url(#sfx)"/>
-        <polygon points="502,288 392,490 612,490" fill="#00D4FF" opacity=".05" filter="url(#sfx)"/>
-
-        <!-- ══ LEFT FRONT WHEEL (closest, largest) ══ -->
-        <circle cx="175" cy="378" r="90" fill="#111132" stroke="#00D4FF" stroke-width="3.5" filter="url(#gw)"/>
-        <circle cx="175" cy="378" r="90" fill="none" stroke="#00D4FF" stroke-width="9"   stroke-dasharray="16 14" opacity=".28"/>
-        <circle cx="175" cy="378" r="90" fill="none" stroke="#00D4FF" stroke-width="4"   stroke-dasharray="8 22" stroke-dashoffset="15" opacity=".14"/>
-        <circle cx="175" cy="378" r="72" fill="none" stroke="#00D4FF" stroke-width="1.5" opacity=".22"/>
-        <circle cx="175" cy="378" r="52" fill="#1a1a40" stroke="#00D4FF" stroke-width="3" filter="url(#gw)"/>
-        <g stroke="#00D4FF" stroke-width="2.5" opacity=".75" filter="url(#gw)">
-          <line x1="175" y1="328" x2="175" y2="352"/> <line x1="175" y1="404" x2="175" y2="428"/>
-          <line x1="125" y1="378" x2="149" y2="378"/> <line x1="201" y1="378" x2="225" y2="378"/>
-          <line x1="140" y1="343" x2="157" y2="360"/> <line x1="193" y1="396" x2="210" y2="413"/>
-          <line x1="210" y1="343" x2="193" y2="360"/> <line x1="157" y1="396" x2="140" y2="413"/>
-        </g>
-        <circle cx="175" cy="378" r="20" fill="#0d0d30" stroke="#00D4FF" stroke-width="2.2" filter="url(#gw)"/>
-        <circle cx="175" cy="378" r="9"  fill="#00D4FF" opacity=".6"/>
-
-        <!-- ══ RIGHT FRONT WHEEL (farther, perspective smaller) ══ -->
-        <circle cx="608" cy="362" r="76" fill="#111132" stroke="#00D4FF" stroke-width="3" filter="url(#gw)"/>
-        <circle cx="608" cy="362" r="76" fill="none"    stroke="#00D4FF" stroke-width="8"   stroke-dasharray="14 12" opacity=".25"/>
-        <circle cx="608" cy="362" r="76" fill="none"    stroke="#00D4FF" stroke-width="3.5" stroke-dasharray="7 19" stroke-dashoffset="12" opacity=".12"/>
-        <circle cx="608" cy="362" r="61" fill="none"    stroke="#00D4FF" stroke-width="1.5" opacity=".18"/>
-        <circle cx="608" cy="362" r="43" fill="#1a1a40" stroke="#00D4FF" stroke-width="2.5" filter="url(#gw)"/>
-        <g stroke="#00D4FF" stroke-width="2.2" opacity=".68" filter="url(#gw)">
-          <line x1="608" y1="320" x2="608" y2="342"/> <line x1="608" y1="382" x2="608" y2="404"/>
-          <line x1="566" y1="362" x2="588" y2="362"/> <line x1="628" y1="362" x2="650" y2="362"/>
-          <line x1="578" y1="332" x2="594" y2="348"/> <line x1="622" y1="376" x2="638" y2="392"/>
-          <line x1="638" y1="332" x2="622" y2="348"/> <line x1="594" y1="376" x2="578" y2="392"/>
-        </g>
-        <circle cx="608" cy="362" r="17" fill="#0d0d30" stroke="#00D4FF" stroke-width="2" filter="url(#gw)"/>
-        <circle cx="608" cy="362" r="7"  fill="#00D4FF" opacity=".55"/>
-
-        <!-- ══ LEFT SIDE PANEL (3/4 depth) ══ -->
-        <path d="M 180 200 L 108 244 L 108 376 L 180 362 Z"
-              fill="#1a1a3c" stroke="#00D4FF" stroke-width="2.5" filter="url(#gw)"/>
-        <line x1="144" y1="272" x2="176" y2="264" stroke="#00D4FF" stroke-width="1" opacity=".35"/>
-        <line x1="144" y1="312" x2="176" y2="304" stroke="#00D4FF" stroke-width=".8" opacity=".22"/>
-
-        <!-- ══ LEFT FRONT FENDER (large arch) ══ -->
-        <path d="M 180 336 Q 146 306 108 318 Q 60 337 56 402 Q 52 455 148 457 Q 265 460 268 380 L 220 368 L 180 362 Z"
-              fill="#181838" stroke="#00D4FF" stroke-width="2.5" filter="url(#gw)"/>
-        <g stroke="#00D4FF" stroke-width="1.2" opacity=".38">
-          <line x1="86" y1="344" x2="108" y2="342"/>
-          <line x1="82" y1="360" x2="104" y2="358"/>
-          <line x1="78" y1="376" x2="100" y2="374"/>
-        </g>
-
-        <!-- ══ RIGHT FRONT FENDER ══ -->
-        <path d="M 636 320 Q 672 296 710 310 Q 754 330 756 392 Q 760 447 664 449 Q 556 451 552 373 L 598 358 L 636 357 Z"
-              fill="#181838" stroke="#00D4FF" stroke-width="2.2" filter="url(#gw)"/>
-
-        <!-- ══ MAIN BODY FRONT FACE ══ -->
-        <path d="M 180 200 L 640 185 L 640 280 L 180 294 Z"
-              fill="#22224a" stroke="#00D4FF" stroke-width="3" filter="url(#gw)"/>
-        <path d="M 180 294 L 640 280 L 640 362 L 180 377 Z"
-              fill="#1c1c42" stroke="#00D4FF" stroke-width="2" opacity=".85"/>
-        <line x1="180" y1="294" x2="640" y2="280" stroke="#00D4FF" stroke-width="1.4" opacity=".45"/>
-        <path d="M 298 200 L 310 218 L 310 294" fill="none" stroke="#00D4FF" stroke-width="1" opacity=".28"/>
-        <path d="M 502 196 L 492 214 L 492 280" fill="none" stroke="#00D4FF" stroke-width="1" opacity=".28"/>
-
-        <!-- ══ HOOD / ROOF ══ -->
-        <path d="M 180 200 L 640 185 L 694 158 L 235 173 Z"
-              fill="#201f48" stroke="#00D4FF" stroke-width="2" opacity=".9"/>
-        <rect x="302" y="162" width="232" height="8" rx="3" fill="#1a1a3e" stroke="#00D4FF" stroke-width="1.2" opacity=".65"/>
-        <line x1="322" y1="170" x2="322" y2="179" stroke="#00D4FF" stroke-width="1.1" opacity=".35"/>
-        <line x1="414" y1="168" x2="414" y2="177" stroke="#00D4FF" stroke-width="1.1" opacity=".35"/>
-        <line x1="506" y1="165" x2="506" y2="174" stroke="#00D4FF" stroke-width="1.1" opacity=".35"/>
-
-        <!-- ══ GRILLE ══ -->
-        <path d="M 288 288 L 532 275 L 532 358 L 288 371 Z"
-              fill="#0e0e28" stroke="#00D4FF" stroke-width="2" opacity=".9"/>
-        <g stroke="#00D4FF" stroke-width="1.4" opacity=".28">
-          <line x1="290" y1="302" x2="531" y2="289"/>
-          <line x1="290" y1="318" x2="531" y2="305"/>
-          <line x1="290" y1="334" x2="531" y2="321"/>
-          <line x1="290" y1="350" x2="531" y2="337"/>
-        </g>
-        <text x="410" y="328" fill="#00D4FF" font-family="monospace" font-weight="900" font-size="14" text-anchor="middle" opacity=".25" letter-spacing="4">EV²</text>
-
-        <!-- ══ LEFT HEADLIGHT — dual-ring LED halo ══ -->
-        <circle cx="308" cy="240" r="90" fill="url(#hl-l)" opacity=".55" filter="url(#sfx)"/>
-        <circle cx="308" cy="240" r="64" fill="#0e0e2e" stroke="#00D4FF" stroke-width="3.5" filter="url(#gw)"/>
-        <circle cx="308" cy="240" r="54" fill="none" stroke="#00D4FF" stroke-width="2" opacity=".62"/>
-        <circle cx="308" cy="240" r="46" fill="none" stroke="#00D4FF" stroke-width="1.2" opacity=".42"/>
-        <circle cx="308" cy="240" r="37" fill="none" stroke="#00D4FF" stroke-width="7" opacity="1" filter="url(#gw)"/>
-        <circle cx="308" cy="240" r="25" fill="#00D4FF" opacity=".15"/>
-        <circle cx="308" cy="240" r="16" fill="#00D4FF" opacity=".35"/>
-        <circle cx="308" cy="240" r="8"  fill="#00D4FF" opacity="1"/>
-        <circle cx="293" cy="225" r="8"  fill="white"   opacity=".22"/>
-        <circle cx="285" cy="218" r="3"  fill="white"   opacity=".12"/>
-        <rect x="256" y="236" width="14" height="3.5" rx="1.75" fill="#00D4FF" opacity=".85"/>
-        <rect x="347" y="234" width="14" height="3.5" rx="1.75" fill="#00D4FF" opacity=".85"/>
-        <rect x="304" y="188" width="3.5" height="14" rx="1.75" fill="#00D4FF" opacity=".65"/>
-
-        <!-- ══ RIGHT HEADLIGHT — same design, perspective-scaled ══ -->
-        <circle cx="502" cy="228" r="78" fill="url(#hl-r)" opacity=".5" filter="url(#sfx)"/>
-        <circle cx="502" cy="228" r="56" fill="#0e0e2e" stroke="#00D4FF" stroke-width="3" filter="url(#gw)"/>
-        <circle cx="502" cy="228" r="47" fill="none" stroke="#00D4FF" stroke-width="1.8" opacity=".58"/>
-        <circle cx="502" cy="228" r="40" fill="none" stroke="#00D4FF" stroke-width="1.1" opacity=".38"/>
-        <circle cx="502" cy="228" r="32" fill="none" stroke="#00D4FF" stroke-width="6.5" opacity="1" filter="url(#gw)"/>
-        <circle cx="502" cy="228" r="21" fill="#00D4FF" opacity=".14"/>
-        <circle cx="502" cy="228" r="13" fill="#00D4FF" opacity=".32"/>
-        <circle cx="502" cy="228" r="6"  fill="#00D4FF" opacity="1"/>
-        <circle cx="489" cy="215" r="7"  fill="white"   opacity=".18"/>
-        <rect x="452" y="224" width="12" height="3.2" rx="1.6" fill="#00D4FF" opacity=".78"/>
-        <rect x="543" y="222" width="12" height="3.2" rx="1.6" fill="#00D4FF" opacity=".78"/>
-        <rect x="498" y="178" width="3.2" height="12" rx="1.6" fill="#00D4FF" opacity=".58"/>
-
-        <!-- ══ FRONT BUMPER ══ -->
-        <path d="M 166 368 L 650 353 L 658 382 L 158 398 Z"
-              fill="#161636" stroke="#00D4FF" stroke-width="2.5"/>
-        <line x1="166" y1="378" x2="650" y2="363" stroke="#00D4FF" stroke-width=".8" opacity=".22"/>
-        <rect x="168" y="368" width="22" height="30" rx="2" fill="#121230" stroke="#00D4FF" stroke-width="1.2" opacity=".75"/>
-        <rect x="638" y="353" width="20" height="28" rx="2" fill="#121230" stroke="#00D4FF" stroke-width="1.1" opacity=".7"/>
-        <rect x="346" y="360" width="126" height="17" rx="3" fill="#0e0e28" stroke="#00D4FF" stroke-width="1.5" opacity=".9"/>
-        <circle cx="364" cy="368.5" r="6" fill="none" stroke="#00D4FF" stroke-width="1.6" opacity=".75"/>
-        <circle cx="458" cy="367.5" r="6" fill="none" stroke="#00D4FF" stroke-width="1.6" opacity=".75"/>
-        <line x1="364" y1="368.5" x2="458" y2="367.5" stroke="#00D4FF" stroke-width="1" opacity=".55"/>
-        <path d="M 406 376 L 406 385 L 418 385" fill="none" stroke="#00D4FF" stroke-width="3" opacity=".65"/>
-
-        <!-- ══ HANDLEBARS ══ -->
-        <rect x="182" y="175" width="30" height="12" rx="5" fill="#00D4FF" opacity=".85" filter="url(#gw)"/>
-        <path d="M 212 181 Q 288 186 326 190" fill="none" stroke="#00D4FF" stroke-width="4.5" opacity=".9" filter="url(#gw)"/>
-        <rect x="372" y="160" width="72" height="32" rx="5" fill="#181838" stroke="#00D4FF" stroke-width="2.2" filter="url(#gw)"/>
-        <rect x="379" y="166" width="58" height="20" rx="3" fill="#101028" stroke="#00D4FF" stroke-width="1.1" opacity=".8"/>
-        <circle cx="395" cy="176" r="5.5" fill="none" stroke="#00D4FF" stroke-width="1.5" opacity=".62"/>
-        <circle cx="421" cy="176" r="5.5" fill="none" stroke="#00D4FF" stroke-width="1.5" opacity=".62"/>
-        <line x1="408" y1="170" x2="408" y2="182" stroke="#00D4FF" stroke-width=".9" opacity=".38"/>
-        <path d="M 444 188 Q 490 186 606 177" fill="none" stroke="#00D4FF" stroke-width="4.5" opacity=".9" filter="url(#gw)"/>
-        <rect x="606" y="170" width="30" height="12" rx="5" fill="#00D4FF" opacity=".85" filter="url(#gw)"/>
-        <line x1="200" y1="183" x2="188" y2="196" stroke="#00D4FF" stroke-width="2.5" opacity=".58"/>
-        <line x1="624" y1="179" x2="636" y2="192" stroke="#00D4FF" stroke-width="2.5" opacity=".55"/>
-
-        <!-- ══ AUTONOMY ANTENNA ══ -->
-        <line x1="408" y1="160" x2="408" y2="82" stroke="#00D4FF" stroke-width="2.5" opacity=".9" filter="url(#gw)"/>
-        <line x1="428" y1="163" x2="428" y2="106" stroke="#00D4FF" stroke-width="1.4" opacity=".45"/>
-        <line x1="388" y1="163" x2="388" y2="108" stroke="#00D4FF" stroke-width="1.4" opacity=".45"/>
-        <line x1="383" y1="108" x2="433" y2="106" stroke="#00D4FF" stroke-width="1.2" opacity=".38"/>
-        <circle cx="408" cy="79" r="7" fill="#00D4FF" opacity="1" filter="url(#gws)"/>
-        <circle cx="408" cy="79" r="7" fill="none" stroke="#00D4FF" stroke-width="1.8">
-          <animate attributeName="r" values="7;28;7" dur="2.4s" repeatCount="indefinite"/>
-          <animate attributeName="opacity" values="1;0;1" dur="2.4s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="408" cy="79" r="7" fill="none" stroke="#00D4FF" stroke-width="1.2">
-          <animate attributeName="r" values="7;44;7" dur="2.4s" begin="0.8s" repeatCount="indefinite"/>
-          <animate attributeName="opacity" values=".6;0;.6" dur="2.4s" begin="0.8s" repeatCount="indefinite"/>
-        </circle>
-
-        <!-- ══ EV STATUS PANEL ══ -->
-        <rect x="348" y="300" width="120" height="40" rx="3" fill="#0e0e2c" stroke="#00D4FF" stroke-width="1.5" opacity=".9"/>
-        <text x="408" y="314" fill="#00D4FF" font-family="monospace" font-size="6.5" text-anchor="middle" opacity=".65" letter-spacing="2">EV² MODEL X1</text>
-        <rect x="356" y="318" width="16" height="14" rx="2" fill="#00D4FF" opacity=".58"/>
-        <rect x="375" y="318" width="16" height="14" rx="2" fill="#00D4FF" opacity=".50"/>
-        <rect x="394" y="318" width="16" height="14" rx="2" fill="#00D4FF" opacity=".44"/>
-        <rect x="413" y="318" width="16" height="14" rx="2" fill="#00D4FF" opacity=".18"/>
-        <rect x="432" y="318" width="10" height="14" rx="2" fill="#00D4FF" opacity=".09"/>
-        <text x="408" y="344" fill="#00D4FF" font-family="monospace" font-size="5.5" text-anchor="middle" opacity=".42" letter-spacing="3">98% · 200MI</text>
-
-        <!-- ══ TAILLIGHT ══ -->
-        <rect x="640" y="294" width="24" height="11" rx="2" fill="#FF3030" opacity=".95" filter="url(#gw)"/>
-        <rect x="640" y="294" width="24" height="11" rx="2" fill="none" stroke="#FF3030" stroke-width="1"/>
-
-        <!-- ══ SCAN LINE ══ -->
-        <rect x="0" y="0" width="800" height="2" fill="#00D4FF" opacity=".1">
-          <animateTransform attributeName="transform" type="translate" values="0,178;0,425;0,178" dur="4.2s" repeatCount="indefinite"/>
-        </rect>
-
-        <!-- ══ FLOOR REFLECTION ══ -->
-        <line x1="50" y1="478" x2="750" y2="470" stroke="#00D4FF" stroke-width=".7" opacity=".28"/>
-        <ellipse cx="400" cy="480" rx="285" ry="10" fill="#00D4FF" opacity=".06"/>
-      </svg>
+      <canvas id="atv-canvas"></canvas>
 
 
     </div><!-- /atv-3d -->
@@ -1330,6 +1117,7 @@
 <!-- ══════════════════════════════════
      SCRIPTS
 ══════════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 /* ── LOADER ── */
 window.addEventListener('load', () => {
@@ -1407,50 +1195,127 @@ document.querySelectorAll('a, button, .atv-wrap').forEach(el => {
   });
 });
 
-/* ── ATV DRAG-ROTATE + AUTO-ROTATE ── */
-const wrap    = document.getElementById('atvWrap');
-const atv3d   = document.getElementById('atv3d');
-let dragging  = false;
-let startX    = 0;
-let curRot    = 0;
-let targRot   = 0;
-let autoSpin  = true;
-let autoAngle = 0;
+/* ── THREE.JS ATV SCENE ── */
+(function() {
+  const canvas = document.getElementById('atv-canvas');
+  if (!canvas || typeof THREE === 'undefined') return;
 
-wrap.addEventListener('mousedown', e => {
-  dragging = true; autoSpin = false;
-  startX = e.clientX - curRot * 2;
-});
-document.addEventListener('mousemove', e => {
-  if (!dragging) return;
-  targRot = Math.max(-38, Math.min(38, (e.clientX - startX) / 2));
-});
-document.addEventListener('mouseup', () => {
-  dragging = false;
-  setTimeout(() => { autoSpin = true; }, 2800);
-});
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  const scene = new THREE.Scene();
 
-wrap.addEventListener('touchstart', e => {
-  dragging = true; autoSpin = false;
-  startX = e.touches[0].clientX - curRot * 2;
-}, { passive: true });
-document.addEventListener('touchmove', e => {
-  if (!dragging) return;
-  targRot = Math.max(-38, Math.min(38, (e.touches[0].clientX - startX) / 2));
-}, { passive: true });
-document.addEventListener('touchend', () => {
-  dragging = false;
-  setTimeout(() => { autoSpin = true; }, 2800);
-});
-
-(function spinLoop() {
-  if (autoSpin) {
-    autoAngle += .22;
-    targRot = Math.sin(autoAngle * Math.PI / 180) * 22;
+  function getSize() {
+    const el = canvas.parentElement;
+    return { w: el.clientWidth || 700, h: el.clientHeight || 560 };
   }
-  curRot += (targRot - curRot) * .07;
-  atv3d.style.transform = `rotateY(${curRot}deg) rotateX(-2deg)`;
-  requestAnimationFrame(spinLoop);
+  const { w, h } = getSize();
+  renderer.setSize(w, h, false);
+
+  const camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 100);
+  camera.position.set(0, 2.0, 7.5);
+  camera.lookAt(0, 0.1, 0);
+
+  const CYAN    = 0x00D4FF;
+  const wireMat = new THREE.LineBasicMaterial({ color: CYAN });
+  const fillMat = new THREE.MeshBasicMaterial({ color: 0x010912 });
+
+  function part(geo, px, py, pz, rx, ry, rz) {
+    const g = new THREE.Group();
+    g.position.set(px, py, pz);
+    if (rx || ry || rz) g.rotation.set(rx || 0, ry || 0, rz || 0);
+    g.add(new THREE.Mesh(geo, fillMat));
+    g.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), wireMat));
+    return g;
+  }
+
+  const atv = new THREE.Group();
+  atv.position.y = 0.1;
+  atv.add(part(new THREE.BoxGeometry(3.2, 0.42, 1.55),   0,    0,    0));
+  atv.add(part(new THREE.BoxGeometry(0.95, 0.5,  1.38),  0.95, 0.42, 0));
+  atv.add(part(new THREE.BoxGeometry(0.78, 0.35, 1.05), -0.82, 0.38, 0));
+  atv.add(part(new THREE.BoxGeometry(0.62, 0.12, 0.70), -0.55, 0.62, 0));
+  atv.add(part(new THREE.BoxGeometry(0.11, 0.42, 1.38),  1.46,-0.05, 0));
+  atv.add(part(new THREE.BoxGeometry(0.88, 0.06, 1.08), -1.22, 0.27, 0));
+  atv.add(part(new THREE.BoxGeometry(0.09, 0.55, 0.09),  1.12, 0.73, 0));
+  atv.add(part(new THREE.BoxGeometry(0.09, 0.09, 1.15),  1.12, 1.0,  0));
+
+  const rimGeo  = new THREE.CylinderGeometry(0.5, 0.5, 0.34, 16);
+  const tireGeo = new THREE.TorusGeometry(0.5, 0.2, 8, 16);
+  [[1.12,-0.38,0.88],[1.12,-0.38,-0.88],[-1.12,-0.38,0.88],[-1.12,-0.38,-0.88]].forEach(([x,y,z]) => {
+    const wg = new THREE.Group();
+    wg.position.set(x, y, z); wg.rotation.x = Math.PI / 2;
+    wg.add(new THREE.Mesh(rimGeo,  fillMat));
+    wg.add(new THREE.LineSegments(new THREE.EdgesGeometry(rimGeo),  wireMat));
+    wg.add(new THREE.Mesh(tireGeo, fillMat));
+    wg.add(new THREE.LineSegments(new THREE.EdgesGeometry(tireGeo), wireMat));
+    atv.add(wg);
+  });
+  scene.add(atv);
+
+  const grid = new THREE.GridHelper(20, 24, 0x003344, 0x001020);
+  grid.position.y = -0.9;
+  grid.material.transparent = true; grid.material.opacity = 0.7;
+  scene.add(grid);
+
+  const N = 260, pPos = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    pPos[i*3]   = (Math.random()-.5)*18;
+    pPos[i*3+1] = (Math.random()-.5)*10;
+    pPos[i*3+2] = (Math.random()-.5)*12;
+  }
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+  scene.add(new THREE.Points(pGeo, new THREE.PointsMaterial({ color: CYAN, size:.05, transparent:true, opacity:.35 })));
+
+  let rotY = -0.4, rotX = 0;
+  let isDragging = false, lastX = 0, lastY = 0;
+  canvas.style.cursor = 'grab';
+
+  canvas.addEventListener('mousedown', e => {
+    isDragging = true; lastX = e.clientX; lastY = e.clientY;
+    canvas.style.cursor = 'grabbing'; e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    rotY += (e.clientX - lastX) * 0.012;
+    rotX += (e.clientY - lastY) * 0.006;
+    rotX = Math.max(-0.65, Math.min(0.65, rotX));
+    lastX = e.clientX; lastY = e.clientY;
+  });
+  document.addEventListener('mouseup', () => {
+    isDragging = false; canvas.style.cursor = 'grab';
+  });
+
+  canvas.addEventListener('touchstart', e => {
+    isDragging = true;
+    lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchmove', e => {
+    if (!isDragging) return;
+    rotY += (e.touches[0].clientX - lastX) * 0.012;
+    rotX += (e.touches[0].clientY - lastY) * 0.006;
+    rotX = Math.max(-0.65, Math.min(0.65, rotX));
+    lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', () => { isDragging = false; });
+
+  window.addEventListener('resize', () => {
+    const s = getSize();
+    renderer.setSize(s.w, s.h, false);
+    camera.aspect = s.w / s.h;
+    camera.updateProjectionMatrix();
+  });
+
+  (function loop() {
+    requestAnimationFrame(loop);
+    const t = Date.now() * .001;
+    if (!isDragging) rotY += 0.003;
+    atv.rotation.y = rotY;
+    atv.rotation.x = rotX;
+    atv.position.y = 0.1 + Math.sin(t * 0.75) * 0.07;
+    grid.position.z = ((t * 0.55) % 0.84) - 0.42;
+    renderer.render(scene, camera);
+  })();
 })();
 
 /* ── SCROLL REVEAL (experience panel — triggers on panel scroll) ── */
