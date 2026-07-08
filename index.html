@@ -1121,6 +1121,7 @@
      SCRIPTS
 ══════════════════════════════════ -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.min.js"></script>
 <script>
 /* ── LOADER ── */
 window.addEventListener('load', () => {
@@ -1218,42 +1219,36 @@ document.querySelectorAll('a, button, .atv-wrap').forEach(el => {
   camera.position.set(0, 1.8, 7.0);
   camera.lookAt(0, 0.1, 0);
 
-  const CYAN    = 0x00D4FF;
-  const wireMat = new THREE.LineBasicMaterial({ color: CYAN });
-  const fillMat = new THREE.MeshBasicMaterial({ color: 0x010912 });
+  const CYAN = 0x00D4FF;
 
-  function part(geo, px, py, pz, rx, ry, rz) {
-    const g = new THREE.Group();
-    g.position.set(px, py, pz);
-    if (rx || ry || rz) g.rotation.set(rx || 0, ry || 0, rz || 0);
-    g.add(new THREE.Mesh(geo, fillMat));
-    g.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), wireMat));
-    return g;
-  }
+  // Lighting for the real 3D model
+  scene.add(new THREE.AmbientLight(0x0a1a2e, 2.0));
+  const keyLight = new THREE.DirectionalLight(0x00D4FF, 2.0);
+  keyLight.position.set(3, 5, 4);
+  scene.add(keyLight);
+  const fillLight = new THREE.DirectionalLight(0x0055cc, 0.8);
+  fillLight.position.set(-4, 2, -3);
+  scene.add(fillLight);
+  const rimLight = new THREE.DirectionalLight(0x00ffcc, 0.5);
+  rimLight.position.set(0, -2, -5);
+  scene.add(rimLight);
 
   const atv = new THREE.Group();
-  atv.position.y = 0.1;
-  atv.add(part(new THREE.BoxGeometry(3.2, 0.42, 1.55),   0,    0,    0));
-  atv.add(part(new THREE.BoxGeometry(0.95, 0.5,  1.38),  0.95, 0.42, 0));
-  atv.add(part(new THREE.BoxGeometry(0.78, 0.35, 1.05), -0.82, 0.38, 0));
-  atv.add(part(new THREE.BoxGeometry(0.62, 0.12, 0.70), -0.55, 0.62, 0));
-  atv.add(part(new THREE.BoxGeometry(0.11, 0.42, 1.38),  1.46,-0.05, 0));
-  atv.add(part(new THREE.BoxGeometry(0.88, 0.06, 1.08), -1.22, 0.27, 0));
-  atv.add(part(new THREE.BoxGeometry(0.09, 0.55, 0.09),  1.12, 0.73, 0));
-  atv.add(part(new THREE.BoxGeometry(0.09, 0.09, 1.15),  1.12, 1.0,  0));
-
-  const rimGeo  = new THREE.CylinderGeometry(0.5, 0.5, 0.34, 16);
-  const tireGeo = new THREE.TorusGeometry(0.5, 0.2, 8, 16);
-  [[1.12,-0.38,0.88],[1.12,-0.38,-0.88],[-1.12,-0.38,0.88],[-1.12,-0.38,-0.88]].forEach(([x,y,z]) => {
-    const wg = new THREE.Group();
-    wg.position.set(x, y, z); wg.rotation.x = Math.PI / 2;
-    wg.add(new THREE.Mesh(rimGeo,  fillMat));
-    wg.add(new THREE.LineSegments(new THREE.EdgesGeometry(rimGeo),  wireMat));
-    wg.add(new THREE.Mesh(tireGeo, fillMat));
-    wg.add(new THREE.LineSegments(new THREE.EdgesGeometry(tireGeo), wireMat));
-    atv.add(wg);
-  });
   scene.add(atv);
+
+  // Load the real quad bike model
+  new THREE.GLTFLoader().load('quad+bike+3d+model.glb', gltf => {
+    const model = gltf.scene;
+    const box   = new THREE.Box3().setFromObject(model);
+    const size  = box.getSize(new THREE.Vector3());
+    const s     = 3.2 / Math.max(size.x, size.y, size.z);
+    model.scale.setScalar(s);
+    const center = box.getCenter(new THREE.Vector3());
+    model.position.x = -center.x * s;
+    model.position.y = -box.min.y * s - 0.85;
+    model.position.z = -center.z * s;
+    atv.add(model);
+  }, undefined, err => console.error('GLB load error:', err));
 
   const grid = new THREE.GridHelper(50, 40, 0x003344, 0x001020);
   grid.position.y = -0.9;

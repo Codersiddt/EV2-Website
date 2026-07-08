@@ -14,7 +14,7 @@ while ($listener.IsListening) {
     if (Test-Path $file) {
         $bytes = [System.IO.File]::ReadAllBytes($file)
         $ext = [System.IO.Path]::GetExtension($file)
-        $ctx.Response.ContentType = if ($ext -eq ".jpg" -or $ext -eq ".jpeg") { "image/jpeg" } elseif ($ext -eq ".png") { "image/png" } else { "text/html; charset=utf-8" }
+        $ctx.Response.ContentType = if ($ext -eq ".jpg" -or $ext -eq ".jpeg") { "image/jpeg" } elseif ($ext -eq ".png") { "image/png" } elseif ($ext -eq ".glb") { "model/gltf-binary" } else { "text/html; charset=utf-8" }
         $ctx.Response.ContentLength64 = $bytes.Length
         $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
     } else {
