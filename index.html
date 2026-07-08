@@ -1249,7 +1249,7 @@ document.querySelectorAll('a, button, .atv-wrap').forEach(el => {
     model.scale.setScalar(s);
     const center = box.getCenter(new THREE.Vector3());
     model.position.x = -center.x * s;
-    model.position.y = -box.min.y * s - 0.85;
+    model.position.y = -box.min.y * s - 0.9;
     model.position.z = -center.z * s;
     atv.add(model);
   }, undefined, err => console.error('GLB load error:', err));
@@ -1259,47 +1259,52 @@ document.querySelectorAll('a, button, .atv-wrap').forEach(el => {
   grid.material.transparent = true; grid.material.opacity = 0.65;
   scene.add(grid);
 
-  // ── SPEC CARDS (sprite billboards) ──
+  // ── SPEC LABELS (glowing 3D text sprites, no box) ──
   function makeSpecCard(label, value, unit) {
     const c = document.createElement('canvas');
-    c.width = 256; c.height = 128;
+    c.width = 256; c.height = 180;
     const ctx = c.getContext('2d');
-    ctx.fillStyle = 'rgba(1,9,18,.9)';
-    ctx.fillRect(0, 0, 256, 128);
-    ctx.strokeStyle = '#00D4FF'; ctx.lineWidth = 1.5;
-    ctx.strokeRect(1, 1, 254, 126);
-    // HUD corner ticks
-    const ticks = [[[1,18],[1,1],[18,1]],[[238,1],[255,1],[255,18]],
-                   [[1,110],[1,127],[18,127]],[[238,127],[255,127],[255,110]]];
-    ticks.forEach(pts => {
-      ctx.beginPath(); ctx.moveTo(...pts[0]); ctx.lineTo(...pts[1]); ctx.lineTo(...pts[2]); ctx.stroke();
-    });
+    ctx.clearRect(0, 0, 256, 180);
     ctx.textAlign = 'center';
-    // Label
-    ctx.fillStyle = 'rgba(0,212,255,.7)';
-    ctx.font = '700 11px "Courier New"';
-    ctx.fillText(label, 128, 24);
-    // Value
+
+    // Label — small cyan glow
+    ctx.shadowColor = '#00D4FF';
+    ctx.shadowBlur = 18;
+    ctx.fillStyle = 'rgba(0,212,255,0.9)';
+    ctx.font = 'bold 13px "Courier New"';
+    ctx.fillText(label, 128, 22);
+
+    // Value — big, layered glow for 3D pop
+    ctx.font = 'bold 78px "Courier New"';
+    ctx.shadowColor = '#00D4FF'; ctx.shadowBlur = 55;
+    ctx.fillStyle = 'rgba(0,212,255,0.25)';
+    ctx.fillText(value, 128, 112);
+    ctx.shadowBlur = 28;
+    ctx.fillStyle = 'rgba(0,212,255,0.55)';
+    ctx.fillText(value, 128, 112);
+    ctx.shadowBlur = 0;
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 52px "Courier New"';
-    ctx.fillText(value, 128, 82);
-    // Unit
-    ctx.fillStyle = 'rgba(0,212,255,.85)';
-    ctx.font = '12px "Courier New"';
-    ctx.fillText(unit, 128, 112);
+    ctx.fillText(value, 128, 112);
+
+    // Unit — cyan glow
+    ctx.shadowColor = '#00D4FF'; ctx.shadowBlur = 14;
+    ctx.fillStyle = 'rgba(0,212,255,0.95)';
+    ctx.font = 'bold 15px "Courier New"';
+    ctx.fillText(unit, 128, 152);
+
     const tex = new THREE.CanvasTexture(c);
-    const spr = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: .92 }));
-    spr.scale.set(2.8, 1.4, 1);
+    const spr = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+    spr.scale.set(3.4, 2.4, 1);
     return spr;
   }
 
   [
-    { label:'PEAK POWER', value:'30',  unit:'kW',   x:-4.0, y: 1.4, z: 0.5 },
-    { label:'TORQUE',     value:'210', unit:'Nm',   x:-4.0, y: 0.0, z: 0.5 },
-    { label:'RANGE',      value:'120', unit:'km',   x:-4.0, y:-1.4, z: 0   },
-    { label:'TOP SPEED',  value:'70',  unit:'km/h', x: 4.0, y: 1.4, z: 0.5 },
-    { label:'PAYLOAD',    value:'245', unit:'kg',   x: 4.0, y: 0.0, z: 0.5 },
-    { label:'CHARGE',     value:'3-4', unit:'hrs',  x: 4.0, y:-1.4, z: 0   },
+    { label:'PEAK POWER', value:'30',  unit:'kW',   x:-5.8, y: 1.6, z: 0 },
+    { label:'TORQUE',     value:'210', unit:'Nm',   x:-5.8, y: 0.0, z: 0 },
+    { label:'RANGE',      value:'120', unit:'km',   x:-5.8, y:-1.6, z: 0 },
+    { label:'TOP SPEED',  value:'70',  unit:'km/h', x: 5.8, y: 1.6, z: 0 },
+    { label:'PAYLOAD',    value:'245', unit:'kg',   x: 5.8, y: 0.0, z: 0 },
+    { label:'CHARGE',     value:'3-4', unit:'hrs',  x: 5.8, y:-1.6, z: 0 },
   ].forEach(s => {
     const spr = makeSpecCard(s.label, s.value, s.unit);
     spr.position.set(s.x, s.y, s.z);
