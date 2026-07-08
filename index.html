@@ -252,6 +252,53 @@
     .exp-row.exp-deep { min-height:170vh; }
     .exp-row.exp-deep .exp-photo { height:150%; top:-25%; }
 
+    /* ─── TECH SPECS ─── */
+    .tech-specs {
+      padding:7rem 5rem; border-top:1px solid rgba(255,255,255,.05);
+      position:relative; overflow:hidden;
+    }
+    .tech-specs::before {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background:radial-gradient(ellipse 80% 50% at 50% 100%, rgba(0,212,255,.05) 0%, transparent 70%);
+    }
+    .ts-grid {
+      display:grid; grid-template-columns:repeat(5,1fr);
+      border:1px solid rgba(0,212,255,.1); margin-top:3.5rem;
+    }
+    .ts-item {
+      padding:2.2rem 1.8rem; border-right:1px solid rgba(0,212,255,.08);
+      border-bottom:1px solid rgba(0,212,255,.08);
+      display:flex; flex-direction:column; gap:.6rem;
+      transition:background .3s;
+    }
+    .ts-item:hover { background:rgba(0,212,255,.03); }
+    .ts-item:nth-child(5n) { border-right:none; }
+    .ts-item:nth-last-child(-n+5) { border-bottom:none; }
+    .ts-label {
+      font-family:'Orbitron',monospace; font-size:.42rem;
+      letter-spacing:.2em; color:var(--accent); opacity:.6; text-transform:uppercase;
+    }
+    .ts-value {
+      font-family:'Barlow Condensed',sans-serif; font-size:1.35rem;
+      font-weight:700; color:var(--white); line-height:1.1; text-transform:uppercase;
+    }
+    .ts-value em {
+      font-style:normal; font-size:2.4rem; font-weight:900;
+      color:var(--accent); letter-spacing:-.02em;
+    }
+    .ts-footnote {
+      margin-top:1.4rem; font-family:'Orbitron',monospace; font-size:.42rem;
+      letter-spacing:.12em; color:var(--dim); opacity:.5;
+    }
+    @media(max-width:900px) {
+      .tech-specs { padding:4rem 1.5rem; }
+      .ts-grid { grid-template-columns:repeat(2,1fr); }
+      .ts-item:nth-child(5n) { border-right:1px solid rgba(0,212,255,.08); }
+      .ts-item:nth-child(even) { border-right:none; }
+      .ts-item:nth-last-child(-n+5) { border-bottom:1px solid rgba(0,212,255,.08); }
+      .ts-item:nth-last-child(-n+2) { border-bottom:none; }
+    }
+
     /* ─── PLATFORM SPEC SECTION ─── */
     .spec-section {
       padding:7rem 5rem; border-top:1px solid rgba(255,255,255,.05);
@@ -1121,6 +1168,55 @@
       <span class="vl tl">MODE: SPORT</span>
       <span class="vl br">POWER: 100%</span>
     </div>
+  </div>
+
+  <!-- ── TECH SPECS ── -->
+  <div class="tech-specs rv">
+    <div class="spec-eyebrow">— PERFORMANCE DATA —</div>
+    <h2 class="spec-title">TECHNICAL SPECIFICATIONS</h2>
+    <div class="ts-grid">
+      <div class="ts-item">
+        <span class="ts-label">Powertrain</span>
+        <span class="ts-value">Fully Electric</span>
+      </div>
+      <div class="ts-item">
+        <span class="ts-label">Drive</span>
+        <span class="ts-value">4×4 All-Wheel Drive</span>
+      </div>
+      <div class="ts-item">
+        <span class="ts-label">Peak Power</span>
+        <span class="ts-value"><em>30</em> kW</span>
+      </div>
+      <div class="ts-item">
+        <span class="ts-label">Peak Torque</span>
+        <span class="ts-value"><em>210</em> Nm</span>
+      </div>
+      <div class="ts-item">
+        <span class="ts-label">Battery</span>
+        <span class="ts-value"><em>15.8</em> kWh LFP</span>
+      </div>
+      <div class="ts-item">
+        <span class="ts-label">Range</span>
+        <span class="ts-value"><em>120</em> km</span>
+      </div>
+      <div class="ts-item">
+        <span class="ts-label">Top Speed</span>
+        <span class="ts-value"><em>70</em> km/h</span>
+      </div>
+      <div class="ts-item">
+        <span class="ts-label">Charging</span>
+        <span class="ts-value">20–80% in <em>3–4</em> hrs</span>
+      </div>
+      <div class="ts-item">
+        <span class="ts-label">Payload</span>
+        <span class="ts-value"><em>245</em> kg</span>
+      </div>
+      <div class="ts-item">
+        <span class="ts-label">Towing Capacity</span>
+        <span class="ts-value"><em>500</em> kg</span>
+      </div>
+    </div>
+    <p class="ts-footnote">* Values represent peak/estimated figures. Actual performance may vary by conditions.</p>
   </div>
 
   <!-- ── PLATFORM SPECIFICATIONS ── -->
