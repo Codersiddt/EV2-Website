@@ -103,9 +103,9 @@
 
     /* ─── ATV VIEWER ─── */
     .atv-wrap {
-      position:relative; width:700px; height:min(430px,52vh);
+      position:relative; width:700px; height:min(560px,68vh);
       perspective:1400px; cursor:grab; user-select:none;
-      margin-top:1.5rem;
+      margin-top:.5rem;
     }
     .atv-wrap:active { cursor:grabbing; }
     .atv-3d {
@@ -166,16 +166,16 @@
 
     /* Explore arrow */
     .explore {
-      display:flex; flex-direction:column; align-items:center; gap:.6rem;
-      margin-top:1rem;
+      display:flex; flex-direction:column; align-items:center; gap:.7rem;
+      margin-top:.8rem;
       text-decoration:none; font-family:'Orbitron',monospace;
-      font-size:.8rem; font-weight:700; letter-spacing:.45em; color:var(--white);
+      font-size:1.3rem; font-weight:900; letter-spacing:.5em; color:var(--white);
       transition:color .3s, text-shadow .3s;
       background:none; border:none; cursor:none; padding:0;
-      text-shadow: 0 0 18px rgba(0,212,255,.5);
+      text-shadow: 0 0 24px rgba(0,212,255,.6);
     }
-    .explore:hover { color:var(--accent); text-shadow: 0 0 30px rgba(0,212,255,.9); }
-    .explore-line { width:1px; height:44px; background:linear-gradient(to bottom,var(--accent),transparent); animation:blink-line 1.6s ease-in-out infinite; }
+    .explore:hover { color:var(--accent); text-shadow: 0 0 40px rgba(0,212,255,1); }
+    .explore-line { width:1px; height:52px; background:linear-gradient(to bottom,var(--accent),transparent); animation:blink-line 1.6s ease-in-out infinite; }
     @keyframes blink-line { 0%,100%{opacity:.35} 50%{opacity:1} }
 
     /* ─── SCAN LINE (global overlay) ─── */
@@ -914,19 +914,6 @@
         <ellipse cx="400" cy="480" rx="285" ry="10" fill="#00D4FF" opacity=".06"/>
       </svg>
 
-      <!-- STAT CHIPS -->
-      <div class="chip chip-1">
-        <div class="cl">MAX RANGE</div>
-        <div class="cv">200<span class="cu"> MI</span></div>
-      </div>
-      <div class="chip chip-2">
-        <div class="cl">0—60 MPH</div>
-        <div class="cv">4.2<span class="cu"> SEC</span></div>
-      </div>
-      <div class="chip chip-3">
-        <div class="cl">AUTONOMY</div>
-        <div class="cv">LVL<span class="cu"> 4</span></div>
-      </div>
 
     </div><!-- /atv-3d -->
   </div><!-- /atv-wrap -->
@@ -936,11 +923,6 @@
     <span>EXPLORE</span>
     <div class="explore-line"></div>
   </button>
-
-  <!-- SLOGAN -->
-  <div class="hero-slogan">
-    GO&nbsp;<span class="ac">EV<sup style="font-size:.3em;vertical-align:super">2</sup></span>&nbsp;GO THE DISTANCE
-  </div>
 
   <!-- TAGLINES -->
   <div class="hero-tags">
@@ -953,49 +935,6 @@
 </section>
 
 
-<!-- ══════════════════════════════════
-     SPECS STRIP
-══════════════════════════════════ -->
-<section id="specs">
-  <div class="specs-label">EV² · MODEL X1 SPECIFICATIONS</div>
-  <div class="specs-grid">
-    <div class="spec-item rv">
-      <span class="spec-num">200</span>
-      <span class="spec-unit">MI RANGE</span>
-      <span class="spec-desc">Single charge, all terrain</span>
-    </div>
-    <div class="spec-item rv">
-      <span class="spec-num">4.2</span>
-      <span class="spec-unit">SEC 0–60</span>
-      <span class="spec-desc">Instant electric torque</span>
-    </div>
-    <div class="spec-item rv">
-      <span class="spec-num">LV4</span>
-      <span class="spec-unit">AUTONOMY</span>
-      <span class="spec-desc">Full self-navigation</span>
-    </div>
-    <div class="spec-item rv">
-      <span class="spec-num">48</span>
-      <span class="spec-unit">MS LATENCY</span>
-      <span class="spec-desc">Remote control response</span>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════
-     PHILOSOPHY STRIP
-══════════════════════════════════ -->
-<section id="philosophy">
-  <div class="phil-bg"></div>
-  <div class="phil-ghost">EV²</div>
-  <div class="phil-content rv">
-    <p class="phil-quote">
-      The terrain doesn't decide where you go.<br>
-      <em>You do.</em>
-    </p>
-    <div class="phil-attr">EV² DESIGN PHILOSOPHY · 2025</div>
-  </div>
-</section>
 
 </div><!-- /pg-home -->
 
