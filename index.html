@@ -1220,8 +1220,8 @@ document.querySelectorAll('a, button, .atv-wrap').forEach(el => {
   renderer.setSize(w, h, false);
 
   const camera = new THREE.PerspectiveCamera(58, w / h, 0.1, 100);
-  camera.position.set(0, 1.8, 7.0);
-  camera.lookAt(0, 0.1, 0);
+  camera.position.set(0, 2.2, 9.5);
+  camera.lookAt(0, 0.5, 0);
 
   const CYAN = 0x00D4FF;
 
@@ -1245,7 +1245,7 @@ document.querySelectorAll('a, button, .atv-wrap').forEach(el => {
     const model = gltf.scene;
     const box   = new THREE.Box3().setFromObject(model);
     const size  = box.getSize(new THREE.Vector3());
-    const s     = 3.2 / Math.max(size.x, size.y, size.z);
+    const s     = 6.0 / Math.max(size.x, size.y, size.z);
     model.scale.setScalar(s);
     const center = box.getCenter(new THREE.Vector3());
     model.position.x = -center.x * s;
