@@ -368,6 +368,39 @@
       .spec-item:last-child { border-bottom:none; }
     }
 
+    /* ─── STAT HERO ─── */
+    .stat-hero {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      min-height:60vh; padding:9rem 4rem 6rem; position:relative;
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+    .stat-hero-inner { display:flex; align-items:stretch; }
+    .stat-block { text-align:center; padding:0 7rem; }
+    .stat-block + .stat-block { border-left:1px solid rgba(255,255,255,.1); }
+    .stat-meta {
+      font-family:'Orbitron',monospace; font-size:.52rem; letter-spacing:.28em;
+      color:var(--dim); text-transform:uppercase; margin-bottom:1.2rem;
+    }
+    .stat-meta span { color:var(--accent); margin-left:.35rem; }
+    .stat-num {
+      font-family:'Barlow Condensed',sans-serif; font-size:clamp(5.5rem,11vw,10rem);
+      font-weight:900; color:var(--white); line-height:1; letter-spacing:-.02em;
+      min-width:3ch; display:inline-block;
+    }
+    .stat-cta-btn {
+      margin-top:4rem; font-family:'Orbitron',monospace; font-size:.5rem;
+      letter-spacing:.22em; color:var(--dim); background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.12); padding:.8rem 2.2rem;
+      cursor:pointer; transition:all .3s; text-transform:uppercase;
+    }
+    .stat-cta-btn:hover { color:var(--white); border-color:rgba(255,255,255,.28); background:rgba(255,255,255,.07); }
+    @media(max-width:700px) {
+      .stat-hero { padding:7rem 2rem 5rem; }
+      .stat-hero-inner { flex-direction:column; gap:3rem; }
+      .stat-block { padding:0 2rem; }
+      .stat-block + .stat-block { border-left:none; border-top:1px solid rgba(255,255,255,.1); padding-top:3rem; }
+    }
+
     /* ─── PAGE 3: PILOT ─── */
     #pilot {
       min-height:100vh; display:flex; flex-direction:column;
@@ -734,6 +767,21 @@
 <div id="pg-experience" class="page-panel">
 
 <section id="experience">
+
+  <!-- ── STAT HERO ── -->
+  <div class="stat-hero">
+    <div class="stat-hero-inner">
+      <div class="stat-block">
+        <div class="stat-meta">RANGE <span>KM</span></div>
+        <div class="stat-num" id="statRange">120</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-meta">PEAK TORQUE <span>NM</span></div>
+        <div class="stat-num" id="statTorque">210</div>
+      </div>
+    </div>
+    <button class="stat-cta-btn" onclick="(function(){ var s=document.querySelector('.tech-specs'); var p=document.getElementById('pg-experience'); if(s&&p) p.scrollTop=s.offsetTop-80; })()">See full specifications</button>
+  </div>
 
   <div class="exp-head">
     <div class="eyebrow">— THE EV² EXPERIENCE —</div>
@@ -1429,6 +1477,41 @@ document.querySelectorAll('.page-panel').forEach(panel => {
     });
   });
 });
+
+/* ── STAT HERO SLOT ANIMATION ── */
+(function() {
+  var stats = [
+    { id: 'statRange',  target: 120 },
+    { id: 'statTorque', target: 210 }
+  ];
+  function slotSpin(el, target) {
+    var frames = 0, total = 32;
+    var iv = setInterval(function() {
+      frames++;
+      var t = frames / total;
+      if (t < 0.72) {
+        el.textContent = Math.floor(Math.random() * target * 1.6 + 10);
+      } else {
+        var ease = 1 - Math.pow(1 - (t - 0.72) / 0.28, 3);
+        el.textContent = Math.round(ease * target);
+      }
+      if (frames >= total) { clearInterval(iv); el.textContent = target; }
+    }, 55);
+  }
+  var hero = document.querySelector('.stat-hero');
+  if (!hero) return;
+  var fired = false;
+  var obs = new IntersectionObserver(function(entries) {
+    if (!entries[0].isIntersecting || fired) return;
+    fired = true;
+    stats.forEach(function(s) {
+      var el = document.getElementById(s.id);
+      if (el) slotSpin(el, s.target);
+    });
+    obs.disconnect();
+  }, { root: expPanel, threshold: 0.3 });
+  obs.observe(hero);
+})();
 
 /* ── PARALLAX PHOTOS (full-bleed experience rows) ── */
 expPanel.addEventListener('scroll', () => {
