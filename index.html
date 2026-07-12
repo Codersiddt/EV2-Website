@@ -380,10 +380,11 @@
     .stat-block { text-align:center; padding:0 7rem; }
     .stat-block + .stat-block { border-left:1px solid rgba(255,255,255,.1); }
     .stat-meta {
-      font-family:'Orbitron',monospace; font-size:.52rem; letter-spacing:.28em;
-      color:var(--dim); text-transform:uppercase; margin-bottom:1.2rem;
+      font-family:'Orbitron',monospace; font-size:.88rem; letter-spacing:.22em;
+      color:var(--accent); text-transform:uppercase; margin-bottom:1.2rem;
+      text-shadow:0 0 22px rgba(0,212,255,.75);
     }
-    .stat-meta span { color:var(--accent); margin-left:.35rem; }
+    .stat-meta span { color:var(--accent); margin-left:.3rem; }
     .stat-num {
       font-family:'Barlow Condensed',sans-serif; font-size:clamp(5.5rem,11vw,10rem);
       font-weight:900; color:var(--white); line-height:1; letter-spacing:-.02em;
@@ -393,12 +394,17 @@
     .slot-strip { display:flex; flex-direction:column; will-change:transform; }
     .slot-strip span { display:block; height:1em; line-height:1; }
     .stat-cta-btn {
-      margin-top:4rem; font-family:'Orbitron',monospace; font-size:.5rem;
-      letter-spacing:.22em; color:var(--dim); background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.12); padding:.8rem 2.2rem;
+      margin-top:4rem; font-family:'Orbitron',monospace; font-size:.72rem;
+      letter-spacing:.22em; color:var(--accent); background:rgba(0,212,255,.06);
+      border:1px solid rgba(0,212,255,.55); padding:1rem 3rem;
       cursor:pointer; transition:all .3s; text-transform:uppercase;
+      text-shadow:0 0 16px rgba(0,212,255,.65);
+      box-shadow:0 0 18px rgba(0,212,255,.12);
     }
-    .stat-cta-btn:hover { color:var(--white); border-color:rgba(255,255,255,.28); background:rgba(255,255,255,.07); }
+    .stat-cta-btn:hover {
+      color:var(--white); border-color:var(--accent);
+      background:rgba(0,212,255,.14); box-shadow:0 0 30px rgba(0,212,255,.28);
+    }
     @media(max-width:700px) {
       .stat-hero { padding:7rem 2rem 5rem; }
       .stat-hero-inner { flex-direction:column; gap:3rem; }
@@ -773,6 +779,11 @@
 
 <section id="experience">
 
+  <div class="exp-head">
+    <div class="eyebrow">— THE EV² EXPERIENCE —</div>
+    <h2 class="section-title">EXPERIENCE EV<sup>2</sup></h2>
+  </div>
+
   <!-- ── STAT HERO ── -->
   <div class="stat-hero">
     <div class="stat-hero-inner">
@@ -786,11 +797,6 @@
       </div>
     </div>
     <button class="stat-cta-btn" onclick="(function(){ var s=document.querySelector('.tech-specs'); var p=document.getElementById('pg-experience'); if(s&&p) p.scrollTop=s.offsetTop-80; })()">See full specifications</button>
-  </div>
-
-  <div class="exp-head">
-    <div class="eyebrow">— THE EV² EXPERIENCE —</div>
-    <h2 class="section-title">EXPERIENCE EV<sup>2</sup></h2>
   </div>
 
   <!-- 01 · BUILT TO MOVE -->
