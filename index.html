@@ -721,6 +721,7 @@
   <ul class="nav-links">
     <li><a href="javascript:void(0)" onclick="navigateTo('pg-home')">HOME</a></li>
     <li><a href="javascript:void(0)" onclick="navigateTo('pg-experience')">EXPERIENCE</a></li>
+    <li><a href="javascript:void(0)" onclick="navigateTo('pg-specs')">SPECS</a></li>
     <li><a href="javascript:void(0)" onclick="navigateTo('pg-pilot')">PILOT PROGRAM</a></li>
   </ul>
   <a href="javascript:void(0)" onclick="navigateTo('pg-pilot')" class="nav-pill">APPLY NOW</a>
@@ -796,7 +797,7 @@
         <div class="stat-num"><div class="slot-wheel" id="statTorque" data-val="210"></div></div>
       </div>
     </div>
-    <button class="stat-cta-btn" onclick="(function(){ var s=document.querySelector('.tech-specs'); var p=document.getElementById('pg-experience'); if(s&&p) p.scrollTop=s.offsetTop-80; })()">See full specifications</button>
+    <button class="stat-cta-btn" onclick="navigateTo('pg-specs')">See full specifications</button>
   </div>
 
   <!-- 01 · BUILT TO MOVE -->
@@ -958,6 +959,23 @@
     </div>
   </div>
 
+  <!-- ── EXPERIENCE → RESERVE CTA ── -->
+  <div class="exp-cta">
+    <button onclick="navigateTo('pg-pilot')" class="cta-reserve rv">RESERVE YOUR EV² →</button>
+  </div>
+
+</section>
+
+</div><!-- /pg-experience -->
+
+
+<!-- ══════════════════════════════════
+     PAGE PANEL 3 — FULL SPECIFICATIONS
+══════════════════════════════════ -->
+<div id="pg-specs" class="page-panel">
+
+<section id="specs" style="padding:6rem 4rem 4rem; max-width:1100px; margin:0 auto;">
+
   <!-- ── TECH SPECS ── -->
   <div class="tech-specs rv">
     <div class="spec-eyebrow">— PERFORMANCE DATA —</div>
@@ -1055,18 +1073,18 @@
     </div>
   </div>
 
-  <!-- ── EXPERIENCE → RESERVE CTA ── -->
+  <!-- ── SPECS CTA ── -->
   <div class="exp-cta">
     <button onclick="navigateTo('pg-pilot')" class="cta-reserve rv">RESERVE YOUR EV² →</button>
   </div>
 
 </section>
 
-</div><!-- /pg-experience -->
+</div><!-- /pg-specs -->
 
 
 <!-- ══════════════════════════════════
-     PAGE PANEL 3 — PILOT / PRE-ORDER
+     PAGE PANEL 4 — PILOT / PRE-ORDER
 ══════════════════════════════════ -->
 <div id="pg-pilot" class="page-panel">
 
@@ -1435,7 +1453,8 @@ document.querySelectorAll('a, button, .atv-wrap').forEach(el => {
 /* ── SCROLL REVEAL (experience panel — triggers on panel scroll) ── */
 const expPanel = document.getElementById('pg-experience');
 const pilPanel = document.getElementById('pg-pilot');
-[expPanel, pilPanel].forEach(panel => {
+const specsPanel = document.getElementById('pg-specs');
+[expPanel, pilPanel, specsPanel].forEach(panel => {
   if (!panel) return;
   const obs = new IntersectionObserver(entries => {
     entries.forEach((en, i) => {
