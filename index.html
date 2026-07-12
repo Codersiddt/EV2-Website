@@ -368,6 +368,51 @@
       .spec-item:last-child { border-bottom:none; }
     }
 
+    /* ─── TERMINAL BOOT SEQUENCE ─── */
+    .terminal-wrap {
+      background:rgba(0,6,14,.85); border:1px solid rgba(0,212,255,.14);
+      padding:2.4rem 3rem; position:relative; overflow:hidden;
+    }
+    .terminal-wrap::after {
+      content:''; position:absolute; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent,rgba(0,212,255,.5),transparent);
+      animation:term-scan 4s linear infinite; top:0; pointer-events:none;
+    }
+    @keyframes term-scan { 0%{top:0;opacity:1} 100%{top:100%;opacity:0} }
+    .term-header {
+      font-family:'Courier New',monospace; font-size:.58rem; letter-spacing:.18em;
+      color:rgba(0,212,255,.45); border-bottom:1px solid rgba(0,212,255,.1);
+      padding-bottom:1.1rem; margin-bottom:.4rem;
+    }
+    .term-line {
+      display:flex; align-items:center; gap:.7rem;
+      padding:.65rem 0; border-bottom:1px solid rgba(0,212,255,.04);
+      font-family:'Courier New',monospace;
+      opacity:0; transform:translateY(5px);
+      transition:opacity .28s ease, transform .28s ease;
+    }
+    .term-line:last-of-type { border-bottom:none; }
+    .term-line.show { opacity:1; transform:translateY(0); }
+    .term-prompt { color:rgba(0,212,255,.35); font-size:.9rem; flex-shrink:0; }
+    .term-label  { color:var(--white); font-size:.82rem; letter-spacing:.05em; flex:1; }
+    .term-fill   { flex:1; height:1px; border-bottom:1px dashed rgba(0,212,255,.15); margin:0 .8rem; align-self:center; }
+    .term-status { font-size:.72rem; letter-spacing:.14em; white-space:nowrap; flex-shrink:0; }
+    .ts-enabled  { color:#00D4FF; }
+    .ts-live     { color:#00ff88; animation:ts-pulse 1.8s ease-in-out infinite; }
+    .ts-connected{ color:#00ff88; }
+    .ts-active   { color:#00D4FF; }
+    .ts-ready    { color:#4488ff; }
+    .ts-standby  { color:#ff9900; opacity:.7; }
+    @keyframes ts-pulse { 0%,100%{opacity:1} 50%{opacity:.45} }
+    .term-cursor-line { padding:.7rem 0; }
+    .term-cursor {
+      display:inline-block; width:9px; height:15px;
+      background:var(--accent); vertical-align:middle;
+      animation:cur-blink 1s step-end infinite;
+    }
+    @keyframes cur-blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    @media(max-width:700px) { .terminal-wrap { padding:1.8rem 1.4rem; } .term-fill { display:none; } }
+
     /* ─── PAGE 3: PILOT ─── */
     #pilot {
       min-height:100vh; display:flex; flex-direction:column;
@@ -852,53 +897,6 @@
     </div>
   </div>
 
-  <!-- 05 · FUN -->
-  <div class="exp-row">
-    <div class="exp-copy rvl">
-      <div class="exp-num">05</div>
-      <h3 class="exp-heading">PURE FUN, REDEFINED</h3>
-      <p class="exp-body">Maximum performance. Zero emissions. Instant torque that pins you to the seat the moment you open it up. EV² is the best time you've ever had outdoors.</p>
-      <span class="exp-badge">SPORT MODE: UNLEASHED</span>
-    </div>
-    <div class="exp-vis rvr" style="background:linear-gradient(135deg,#080820,#100820);">
-      <svg viewBox="0 0 480 320" fill="none" style="width:100%;height:85%;padding:1.5rem;">
-        <g transform="translate(240,160)">
-          <!-- Radial rays -->
-          <g stroke="#00D4FF" stroke-width="1.6" opacity=".6">
-            <line x1="0"    y1="-115" x2="0"    y2="-80"/>
-            <line x1="81"   y1="-81"  x2="57"   y2="-57"  transform="rotate(0)"/>
-            <line x1="115"  y1="0"    x2="80"   y2="0"    transform="rotate(90)"/>
-            <line x1="81"   y1="81"   x2="57"   y2="57"   transform="rotate(90)"/>
-            <line x1="0"    y1="115"  x2="0"    y2="80"   transform="rotate(180)"/>
-            <line x1="-81"  y1="81"   x2="-57"  y2="57"   transform="rotate(180)"/>
-            <line x1="-115" y1="0"    x2="-80"  y2="0"    transform="rotate(270)"/>
-            <line x1="-81"  y1="-81"  x2="-57"  y2="-57"  transform="rotate(270)"/>
-          </g>
-          <!-- Orange accent rays -->
-          <g stroke="#FF6B00" stroke-width="1" opacity=".35">
-            <line x1="57"   y1="-99"  x2="40"   y2="-70"/>
-            <line x1="99"   y1="-57"  x2="70"   y2="-40"/>
-            <line x1="99"   y1="57"   x2="70"   y2="40"/>
-            <line x1="57"   y1="99"   x2="40"   y2="70"/>
-            <line x1="-57"  y1="99"   x2="-40"  y2="70"/>
-            <line x1="-99"  y1="57"   x2="-70"  y2="40"/>
-            <line x1="-99"  y1="-57"  x2="-70"  y2="-40"/>
-            <line x1="-57"  y1="-99"  x2="-40"  y2="-70"/>
-          </g>
-          <!-- Glow center -->
-          <circle r="35" fill="#00D4FF" opacity=".07"/>
-          <circle r="18" fill="#00D4FF" opacity=".12"/>
-          <circle r="6"  fill="#00D4FF" opacity=".95"/>
-          <!-- EV² -->
-          <text y="5" fill="#00D4FF" font-family="monospace" font-weight="900" font-size="13" text-anchor="middle" letter-spacing="2">EV²</text>
-        </g>
-        <text x="240" y="286" fill="#00D4FF" font-family="monospace" font-size="8.5" text-anchor="middle" opacity=".5" letter-spacing="7">PERFORMANCE · UNLEASHED</text>
-      </svg>
-      <span class="vl tl">MODE: SPORT</span>
-      <span class="vl br">POWER: 100%</span>
-    </div>
-  </div>
-
   <!-- ── TECH SPECS ── -->
   <div class="tech-specs rv">
     <div class="spec-eyebrow">— PERFORMANCE DATA —</div>
@@ -952,47 +950,57 @@
   <div class="spec-section rv">
     <div class="spec-eyebrow">— SYSTEM OVERVIEW —</div>
     <h2 class="spec-title">PLATFORM<br>SPECIFICATIONS</h2>
-    <div class="spec-grid">
-      <div class="spec-item rvl">
-        <span class="spec-dot"></span>
-        <span class="spec-label">Remote Operation</span>
-        <span class="spec-status">ENABLED</span>
+    <div class="terminal-wrap" id="termWrap">
+      <div class="term-header">EV² SYSTEM DIAGNOSTIC &nbsp;// BUILD 2025.1 // BOOT SEQUENCE INITIATED</div>
+      <div class="term-line" data-delay="0">
+        <span class="term-prompt">›</span>
+        <span class="term-label">REMOTE OPERATION</span>
+        <span class="term-fill"></span>
+        <span class="term-status ts-enabled">ENABLED ✓</span>
       </div>
-      <div class="spec-item rvr">
-        <span class="spec-dot"></span>
-        <span class="spec-label">Return-to-Base</span>
-        <span class="spec-status">ENABLED</span>
+      <div class="term-line" data-delay="320">
+        <span class="term-prompt">›</span>
+        <span class="term-label">RETURN-TO-BASE</span>
+        <span class="term-fill"></span>
+        <span class="term-status ts-enabled">ENABLED ✓</span>
       </div>
-      <div class="spec-item rvl">
-        <span class="spec-dot"></span>
-        <span class="spec-label">OTA Software Updates</span>
-        <span class="spec-status">LIVE</span>
+      <div class="term-line" data-delay="640">
+        <span class="term-prompt">›</span>
+        <span class="term-label">OTA SOFTWARE UPDATES</span>
+        <span class="term-fill"></span>
+        <span class="term-status ts-live">LIVE ●</span>
       </div>
-      <div class="spec-item rvr">
-        <span class="spec-dot"></span>
-        <span class="spec-label">Mobile App Control</span>
-        <span class="spec-status">CONNECTED</span>
+      <div class="term-line" data-delay="960">
+        <span class="term-prompt">›</span>
+        <span class="term-label">MOBILE APP CONTROL</span>
+        <span class="term-fill"></span>
+        <span class="term-status ts-connected">CONNECTED ✓</span>
       </div>
-      <div class="spec-item rvl">
-        <span class="spec-dot"></span>
-        <span class="spec-label">Vehicle Diagnostics</span>
-        <span class="spec-status">ACTIVE</span>
+      <div class="term-line" data-delay="1280">
+        <span class="term-prompt">›</span>
+        <span class="term-label">VEHICLE DIAGNOSTICS</span>
+        <span class="term-fill"></span>
+        <span class="term-status ts-active">ACTIVE ✓</span>
       </div>
-      <div class="spec-item rvr">
-        <span class="spec-dot"></span>
-        <span class="spec-label">Fleet Management Ready</span>
-        <span class="spec-status">READY</span>
+      <div class="term-line" data-delay="1600">
+        <span class="term-prompt">›</span>
+        <span class="term-label">FLEET MANAGEMENT READY</span>
+        <span class="term-fill"></span>
+        <span class="term-status ts-ready">READY</span>
       </div>
-      <div class="spec-item rvl">
-        <span class="spec-dot"></span>
-        <span class="spec-label">Voice Ready</span>
-        <span class="spec-status">STANDBY</span>
+      <div class="term-line" data-delay="1920">
+        <span class="term-prompt">›</span>
+        <span class="term-label">VOICE READY</span>
+        <span class="term-fill"></span>
+        <span class="term-status ts-standby">STANDBY ◌</span>
       </div>
-      <div class="spec-item rvr">
-        <span class="spec-dot"></span>
-        <span class="spec-label">Autonomous Ready</span>
-        <span class="spec-status">STANDBY</span>
+      <div class="term-line" data-delay="2240">
+        <span class="term-prompt">›</span>
+        <span class="term-label">AUTONOMOUS READY</span>
+        <span class="term-fill"></span>
+        <span class="term-status ts-standby">STANDBY ◌</span>
       </div>
+      <div class="term-cursor-line"><span class="term-cursor"></span></div>
     </div>
   </div>
 
@@ -1429,6 +1437,23 @@ document.querySelectorAll('.page-panel').forEach(panel => {
     });
   });
 });
+
+/* ── TERMINAL BOOT SEQUENCE ── */
+(function() {
+  var wrap = document.getElementById('termWrap');
+  if (!wrap) return;
+  var lines = wrap.querySelectorAll('.term-line[data-delay]');
+  var fired = false;
+  var obs = new IntersectionObserver(function(entries) {
+    if (!entries[0].isIntersecting || fired) return;
+    fired = true;
+    lines.forEach(function(el) {
+      setTimeout(function() { el.classList.add('show'); }, parseInt(el.dataset.delay) || 0);
+    });
+    obs.disconnect();
+  }, { root: expPanel, threshold: 0.15 });
+  obs.observe(wrap);
+})();
 
 /* ── PARALLAX PHOTOS (full-bleed experience rows) ── */
 expPanel.addEventListener('scroll', () => {
