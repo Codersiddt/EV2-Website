@@ -385,6 +385,22 @@
     .bmw-tl .bmw-sub { margin-top:.9rem; }
     .bmw-br .bmw-sub { margin-bottom:.9rem; }
     .bmw-frame.sub-on .bmw-sub { color:rgba(255,255,255,.55); }
+    /* ── HORIZONTAL SLIDE REVEAL ── */
+    .slide-scene { position:relative; height:280vh; }
+    .slide-sticky { position:sticky; top:0; height:100vh; overflow:hidden; }
+    .slide-bg { position:absolute; inset:0; background-size:cover; background-position:center; filter:brightness(.75); }
+    .slide-curtain {
+      position:absolute; inset:0;
+      background:linear-gradient(135deg,rgba(0,0,0,.88) 0%,rgba(0,0,0,.78) 55%,rgba(0,0,0,.48) 80%,rgba(0,0,0,.12) 100%);
+      will-change:transform; display:flex; align-items:center; padding-left:7%;
+    }
+    .slide-curtain::after {
+      content:''; position:absolute; top:0; right:0; bottom:0; width:2px;
+      background:rgba(0,212,255,.45);
+      box-shadow:0 0 18px rgba(0,212,255,.35), 0 0 40px rgba(0,212,255,.15);
+    }
+    .slide-specs { display:flex; flex-direction:column; gap:3.5rem; max-width:340px; }
+    .slide-specs .sp { position:relative; left:auto; top:auto; opacity:1; transform:none; }
     @media(max-width:900px) {
       .tech-specs { padding:4rem 1.5rem; }
       .ts-grid { grid-template-columns:repeat(2,1fr); }
@@ -1088,22 +1104,25 @@
     </div>
   </div>
 
-  <!-- SCENE 2: Desert — Peak Power + Drive + Battery -->
-  <div class="spec-scene">
-    <div class="scene-bg" style="background-image:url('ATV_realistic_2.png')"></div>
-    <div class="scene-overlay"></div>
-    <div class="scene-content">
-      <div class="sp" style="--sl:7%;--st:26%;--sd:0s">
-        <span class="sp-lbl">Peak Power</span>
-        <span class="sp-val"><em>30</em> kW</span>
-      </div>
-      <div class="sp" style="--sl:60%;--st:44%;--sd:.2s">
-        <span class="sp-lbl">Drive</span>
-        <span class="sp-val">4×4 All-Wheel Drive</span>
-      </div>
-      <div class="sp" style="--sl:8%;--st:64%;--sd:.38s">
-        <span class="sp-lbl">Battery</span>
-        <span class="sp-val"><em>15.8</em> kWh LFP</span>
+  <!-- SLIDE SCENE: Desert — curtain slides left, image revealed -->
+  <div class="slide-scene">
+    <div class="slide-sticky">
+      <div class="slide-bg" style="background-image:url('ATV_realistic_2.png')"></div>
+      <div class="slide-curtain" id="slideCurtain">
+        <div class="slide-specs">
+          <div class="sp on">
+            <span class="sp-lbl">Peak Power</span>
+            <span class="sp-val"><em>30</em> kW</span>
+          </div>
+          <div class="sp on" style="transition-delay:.1s">
+            <span class="sp-lbl">Drive</span>
+            <span class="sp-val">4×4 All-Wheel Drive</span>
+          </div>
+          <div class="sp on" style="transition-delay:.2s">
+            <span class="sp-lbl">Battery</span>
+            <span class="sp-val"><em>15.8</em> kWh LFP</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1646,6 +1665,23 @@ document.querySelectorAll('.page-panel').forEach(panel => {
     }
   }
   sp.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+/* ── SLIDE CURTAIN (desert scene) ── */
+(function(){
+  var sp = document.getElementById('pg-specs');
+  var scene = sp && sp.querySelector('.slide-scene');
+  if (!scene) return;
+  var curtain = document.getElementById('slideCurtain');
+  function update() {
+    var sTop = scene.offsetTop;
+    var travel = scene.offsetHeight - sp.clientHeight;
+    if (travel <= 0) return;
+    var p = Math.max(0, Math.min(1, (sp.scrollTop - sTop) / travel));
+    curtain.style.transform = 'translateX(' + (-p * 110) + '%)';
+  }
+  sp.addEventListener('scroll', update, { passive:true });
   update();
 })();
 
