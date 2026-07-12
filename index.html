@@ -401,6 +401,26 @@
     }
     .slide-specs { display:flex; flex-direction:column; gap:3.5rem; max-width:340px; }
     .slide-specs .sp { position:relative; left:auto; top:auto; opacity:1; transform:none; }
+    /* ── VENETIAN BLIND REVEAL ── */
+    .blind-scene { position:relative; height:300vh; }
+    .blind-sticky { position:sticky; top:0; height:100vh; overflow:hidden; }
+    .blind-strip {
+      position:absolute; inset:0;
+      background-size:cover; background-position:center;
+      will-change:transform; filter:brightness(.78);
+    }
+    .blind-overlay {
+      position:absolute; inset:0; z-index:1; pointer-events:none;
+      background:linear-gradient(135deg,rgba(0,0,0,.58) 0%,rgba(0,0,0,.1) 55%,rgba(0,0,0,.44) 100%);
+      opacity:0; transition:opacity .6s ease;
+    }
+    .blind-overlay.on { opacity:1; }
+    .blind-specs {
+      position:absolute; z-index:2; left:7%; top:50%;
+      transform:translateY(-50%);
+      display:flex; flex-direction:column; gap:2.8rem;
+    }
+    .blind-specs .sp { position:relative; left:auto; top:auto; }
     @media(max-width:900px) {
       .tech-specs { padding:4rem 1.5rem; }
       .ts-grid { grid-template-columns:repeat(2,1fr); }
@@ -1127,22 +1147,30 @@
     </div>
   </div>
 
-  <!-- SCENE 3: Mountain — Powertrain + Top Speed + Charging -->
-  <div class="spec-scene">
-    <div class="scene-bg" style="background-image:url('ATV_realistic_1.png')"></div>
-    <div class="scene-overlay"></div>
-    <div class="scene-content">
-      <div class="sp" style="--sl:8%;--st:30%;--sd:0s">
-        <span class="sp-lbl">Powertrain</span>
-        <span class="sp-val">Fully Electric</span>
-      </div>
-      <div class="sp" style="--sl:62%;--st:48%;--sd:.2s">
-        <span class="sp-lbl">Top Speed</span>
-        <span class="sp-val"><em>70</em> km/h</span>
-      </div>
-      <div class="sp" style="--sl:9%;--st:66%;--sd:.38s">
-        <span class="sp-lbl">Charging</span>
-        <span class="sp-val">20–80% in <em>3–4</em> hrs</span>
+  <!-- VENETIAN BLIND SCENE: Mountain -->
+  <div class="blind-scene">
+    <div class="blind-sticky">
+      <div class="blind-strip" style="background-image:url('ATV_realistic_1.png');clip-path:inset(0% 0% 85.72% 0%)"></div>
+      <div class="blind-strip" style="background-image:url('ATV_realistic_1.png');clip-path:inset(14.28% 0% 71.44% 0%)"></div>
+      <div class="blind-strip" style="background-image:url('ATV_realistic_1.png');clip-path:inset(28.57% 0% 57.15% 0%)"></div>
+      <div class="blind-strip" style="background-image:url('ATV_realistic_1.png');clip-path:inset(42.86% 0% 42.86% 0%)"></div>
+      <div class="blind-strip" style="background-image:url('ATV_realistic_1.png');clip-path:inset(57.14% 0% 28.58% 0%)"></div>
+      <div class="blind-strip" style="background-image:url('ATV_realistic_1.png');clip-path:inset(71.43% 0% 14.29% 0%)"></div>
+      <div class="blind-strip" style="background-image:url('ATV_realistic_1.png');clip-path:inset(85.71% 0% 0% 0%)"></div>
+      <div class="blind-overlay" id="blindOverlay"></div>
+      <div class="blind-specs" id="blindSpecs">
+        <div class="sp">
+          <span class="sp-lbl">Powertrain</span>
+          <span class="sp-val">Fully Electric</span>
+        </div>
+        <div class="sp" style="--sd:.18s">
+          <span class="sp-lbl">Top Speed</span>
+          <span class="sp-val"><em>70</em> km/h</span>
+        </div>
+        <div class="sp" style="--sd:.36s">
+          <span class="sp-lbl">Charging</span>
+          <span class="sp-val">20–80% in <em>3–4</em> hrs</span>
+        </div>
       </div>
     </div>
   </div>
@@ -1680,6 +1708,35 @@ document.querySelectorAll('.page-panel').forEach(panel => {
     if (travel <= 0) return;
     var p = Math.max(0, Math.min(1, (sp.scrollTop - sTop) / travel));
     curtain.style.transform = 'translateX(' + (-p * 110) + '%)';
+  }
+  sp.addEventListener('scroll', update, { passive:true });
+  update();
+})();
+
+/* VENETIAN BLIND REVEAL (mountain scene) */
+(function(){
+  var sp = document.getElementById('pg-specs');
+  var scene = sp && sp.querySelector('.blind-scene');
+  if (!scene) return;
+  var strips = Array.prototype.slice.call(scene.querySelectorAll('.blind-strip'));
+  var overlay = document.getElementById('blindOverlay');
+  var specItems = Array.prototype.slice.call(document.querySelectorAll('#blindSpecs .sp'));
+  function easeOut(t){ return 1 - Math.pow(1 - t, 3); }
+  function update(){
+    var sTop = scene.offsetTop;
+    var travel = scene.offsetHeight - sp.clientHeight;
+    if (travel <= 0) return;
+    var p = Math.max(0, Math.min(1, (sp.scrollTop - sTop) / travel));
+    var slideP = easeOut(Math.min(1, p / 0.65));
+    strips.forEach(function(strip, i){
+      var dir = i % 2 === 0 ? -1 : 1;
+      strip.style.transform = 'translateX(' + (dir * (1 - slideP) * 110) + '%)';
+    });
+    var specP = Math.max(0, (p - 0.65) / 0.35);
+    if (overlay) overlay.classList.toggle('on', specP > 0.2);
+    specItems.forEach(function(item, i){
+      item.classList.toggle('on', specP > i * 0.25);
+    });
   }
   sp.addEventListener('scroll', update, { passive:true });
   update();
