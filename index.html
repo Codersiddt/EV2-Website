@@ -325,6 +325,31 @@
       text-shadow:0 0 20px rgba(0,212,255,.6);
     }
     .spec-img-gap { height:16rem; }
+    /* ── SPEC IMAGE BLOCKS ── */
+    .spec-img-block {
+      position:relative; width:62%; height:400px; overflow:hidden;
+      border-radius:2px; margin:1.5rem 0 3.5rem;
+      border:1px solid rgba(0,212,255,.12);
+    }
+    .spec-img-block.right { margin-left:auto; }
+    .spec-img-block img {
+      width:100%; height:100%; object-fit:cover; object-position:center;
+      display:block; transition:transform 7s ease;
+    }
+    .spec-img-block:hover img { transform:scale(1.04); }
+    .spec-img-caption {
+      position:absolute; bottom:0; left:0; right:0;
+      padding:2.5rem 1.8rem 1.4rem;
+      background:linear-gradient(to top, rgba(0,0,0,.78) 0%, transparent 100%);
+      font-family:'Orbitron',monospace; font-size:.58rem;
+      letter-spacing:.28em; color:rgba(255,255,255,.8);
+      text-transform:uppercase;
+    }
+    .spec-img-caption strong {
+      display:block; font-size:1rem; letter-spacing:.08em;
+      color:#fff; margin-bottom:.35rem;
+      text-shadow:0 0 24px rgba(0,212,255,.4);
+    }
     @media(max-width:900px) {
       .tech-specs { padding:4rem 1.5rem; }
       .ts-grid { grid-template-columns:repeat(2,1fr); }
@@ -1014,7 +1039,13 @@
   <div class="specs-scatter">
 
     <!-- image slot 1 -->
-    <div class="spec-img-gap"></div>
+    <div class="spec-img-block rvl">
+      <img src="ATV_realistic_3.png" alt="EV2 ATV at hill station">
+      <div class="spec-img-caption">
+        <strong>ANY TERRAIN. ANY MISSION.</strong>
+        — EV² X1 IN THE FIELD —
+      </div>
+    </div>
 
     <div class="spec-bubble rv" style="--bx:8%">
       <span class="sb-label">Powertrain</span>
@@ -1026,7 +1057,13 @@
     </div>
 
     <!-- image slot 2 -->
-    <div class="spec-img-gap"></div>
+    <div class="spec-img-block right rvr">
+      <img src="ATV_realistic_2.png" alt="EV2 ATV on desert dunes">
+      <div class="spec-img-caption">
+        <strong>ENGINEERED FOR THE EXTREME.</strong>
+        — DESERT PERFORMANCE TESTED —
+      </div>
+    </div>
 
     <div class="spec-bubble rv" style="--bx:20%">
       <span class="sb-label">Peak Power</span>
@@ -1038,7 +1075,13 @@
     </div>
 
     <!-- image slot 3 -->
-    <div class="spec-img-gap"></div>
+    <div class="spec-img-block rvl">
+      <img src="ATV_realistic_1.png" alt="EV2 ATV on mountain road">
+      <div class="spec-img-caption">
+        <strong>ZERO EMISSIONS. FULL POWER.</strong>
+        — HIGH ALTITUDE READY —
+      </div>
+    </div>
 
     <div class="spec-bubble rv" style="--bx:5%">
       <span class="sb-label">Battery</span>
