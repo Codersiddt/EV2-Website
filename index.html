@@ -294,62 +294,64 @@
       margin-top:1.4rem; font-family:'Orbitron',monospace; font-size:.42rem;
       letter-spacing:.12em; color:var(--dim); opacity:.5;
     }
-    /* ── SCATTERED SPEC BUBBLES ── */
-    .specs-scatter {
-      display:flex; flex-direction:column; padding:0 0 4rem;
+    /* ── SPECS PAGE SCENES (BMW-style) ── */
+    .specs-pg-head { padding:6rem 5rem 2rem; }
+    .spec-scene {
+      position:relative; height:100vh; overflow:hidden;
     }
-    .spec-bubble {
-      position:relative; width:240px; margin-left:var(--bx,0); margin-bottom:2.8rem;
-      padding:1.4rem 1.8rem;
-      background:rgba(0,0,0,.45);
-      border:1px solid rgba(0,212,255,.2);
-      border-radius:3px;
-      box-shadow:0 0 28px rgba(0,212,255,.07), 0 0 0 .5px rgba(0,212,255,.06);
-      backdrop-filter:blur(6px);
+    .scene-bg {
+      position:absolute; inset:-12% 0;
+      background-size:cover; background-position:center;
+      will-change:transform; filter:brightness(.6);
     }
-    .spec-bubble::before {
-      content:''; position:absolute; top:0; left:10%; right:10%; height:1px;
-      background:linear-gradient(90deg,transparent,rgba(0,212,255,.45),transparent);
+    .scene-overlay {
+      position:absolute; inset:0; z-index:1;
+      background:linear-gradient(135deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.08) 55%,rgba(0,0,0,.42) 100%);
     }
-    .sb-label {
-      display:block; font-family:'Orbitron',monospace; font-size:.5rem;
-      letter-spacing:.22em; color:rgba(0,212,255,.6); text-transform:uppercase;
-      margin-bottom:.55rem;
+    .scene-content { position:relative; z-index:2; height:100%; }
+    .sp {
+      position:absolute; left:var(--sl); top:var(--st);
+      opacity:0; transform:translateY(22px);
+      transition:opacity .78s ease var(--sd,0s), transform .78s ease var(--sd,0s);
     }
-    .sb-value {
-      display:block; font-family:'Orbitron',monospace; font-size:.95rem;
-      color:rgba(255,255,255,.9); letter-spacing:.04em;
+    .sp.on { opacity:1; transform:translateY(0); }
+    .sp::before {
+      content:''; display:block; width:22px; height:1px;
+      background:var(--accent); margin-bottom:.55rem;
+      box-shadow:0 0 12px rgba(0,212,255,.6);
     }
-    .sb-value em {
-      font-style:normal; color:var(--accent); font-size:1.3rem;
-      text-shadow:0 0 20px rgba(0,212,255,.6);
+    .sp-lbl {
+      display:block; font-family:'Orbitron',monospace;
+      font-size:.48rem; letter-spacing:.25em; color:rgba(0,212,255,.9);
+      text-transform:uppercase; margin-bottom:.38rem;
+      text-shadow:0 1px 8px rgba(0,0,0,.95);
     }
-    .spec-img-gap { height:16rem; }
-    /* ── SPEC IMAGE BLOCKS ── */
-    .spec-img-block {
-      position:relative; width:62%; height:400px; overflow:hidden;
-      border-radius:2px; margin:1.5rem 0 3.5rem;
-      border:1px solid rgba(0,212,255,.12);
+    .sp-val {
+      display:block; font-family:'Orbitron',monospace;
+      font-size:1.05rem; color:#fff;
+      text-shadow:0 2px 20px rgba(0,0,0,.95); line-height:1.25;
     }
-    .spec-img-block.right { margin-left:auto; }
-    .spec-img-block img {
-      width:100%; height:100%; object-fit:cover; object-position:center;
-      display:block; transition:transform 7s ease;
+    .sp-val em {
+      font-style:normal; color:var(--accent); font-size:1.5rem;
+      text-shadow:0 0 28px rgba(0,212,255,.6),0 2px 20px rgba(0,0,0,.95);
     }
-    .spec-img-block:hover img { transform:scale(1.04); }
-    .spec-img-caption {
-      position:absolute; bottom:0; left:0; right:0;
-      padding:2.5rem 1.8rem 1.4rem;
-      background:linear-gradient(to top, rgba(0,0,0,.78) 0%, transparent 100%);
-      font-family:'Orbitron',monospace; font-size:.58rem;
-      letter-spacing:.28em; color:rgba(255,255,255,.8);
-      text-transform:uppercase;
+    .spec-data-row {
+      display:flex; justify-content:center; align-items:center;
+      gap:6rem; padding:5rem 4rem;
+      border-top:1px solid rgba(255,255,255,.06);
     }
-    .spec-img-caption strong {
-      display:block; font-size:1rem; letter-spacing:.08em;
-      color:#fff; margin-bottom:.35rem;
-      text-shadow:0 0 24px rgba(0,212,255,.4);
+    .sdr-item { text-align:center; }
+    .sdr-label {
+      font-family:'Orbitron',monospace; font-size:.5rem;
+      letter-spacing:.22em; color:rgba(0,212,255,.65);
+      text-transform:uppercase; margin-bottom:.7rem;
     }
+    .sdr-val { font-family:'Orbitron',monospace; font-size:2rem; color:#fff; }
+    .sdr-val em {
+      font-style:normal; color:var(--accent);
+      text-shadow:0 0 22px rgba(0,212,255,.5);
+    }
+    .sdr-divider { width:1px; height:3rem; background:rgba(255,255,255,.14); }
     @media(max-width:900px) {
       .tech-specs { padding:4rem 1.5rem; }
       .ts-grid { grid-template-columns:repeat(2,1fr); }
@@ -1030,102 +1032,87 @@
 ══════════════════════════════════ -->
 <div id="pg-specs" class="page-panel">
 
-<section id="specs" style="padding:6rem 5rem 4rem;">
-
-  <!-- ── TECH SPECS SCATTERED ── -->
-  <div class="spec-eyebrow rv">— PERFORMANCE DATA —</div>
-  <h2 class="spec-title rv" style="margin-bottom:0">TECHNICAL SPECIFICATIONS</h2>
-
-  <div class="specs-scatter">
-
-    <!-- image slot 1 -->
-    <div class="spec-img-block rvl">
-      <img src="ATV_realistic_3.png" alt="EV2 ATV at hill station">
-      <div class="spec-img-caption">
-        <strong>ANY TERRAIN. ANY MISSION.</strong>
-        — EV² X1 IN THE FIELD —
-      </div>
-    </div>
-
-    <div class="spec-bubble rv" style="--bx:8%">
-      <span class="sb-label">Powertrain</span>
-      <span class="sb-value">Fully Electric</span>
-    </div>
-    <div class="spec-bubble rv" style="--bx:56%">
-      <span class="sb-label">Drive</span>
-      <span class="sb-value">4×4 All-Wheel Drive</span>
-    </div>
-
-    <!-- image slot 2 -->
-    <div class="spec-img-block right rvr">
-      <img src="ATV_realistic_2.png" alt="EV2 ATV on desert dunes">
-      <div class="spec-img-caption">
-        <strong>ENGINEERED FOR THE EXTREME.</strong>
-        — DESERT PERFORMANCE TESTED —
-      </div>
-    </div>
-
-    <div class="spec-bubble rv" style="--bx:20%">
-      <span class="sb-label">Peak Power</span>
-      <span class="sb-value"><em>30</em> kW</span>
-    </div>
-    <div class="spec-bubble rv" style="--bx:60%">
-      <span class="sb-label">Peak Torque</span>
-      <span class="sb-value"><em>210</em> Nm</span>
-    </div>
-
-    <!-- image slot 3 -->
-    <div class="spec-img-block rvl">
-      <img src="ATV_realistic_1.png" alt="EV2 ATV on mountain road">
-      <div class="spec-img-caption">
-        <strong>ZERO EMISSIONS. FULL POWER.</strong>
-        — HIGH ALTITUDE READY —
-      </div>
-    </div>
-
-    <div class="spec-bubble rv" style="--bx:5%">
-      <span class="sb-label">Battery</span>
-      <span class="sb-value"><em>15.8</em> kWh LFP</span>
-    </div>
-    <div class="spec-bubble rv" style="--bx:40%">
-      <span class="sb-label">Range</span>
-      <span class="sb-value"><em>120</em> km</span>
-    </div>
-    <div class="spec-bubble rv" style="--bx:66%">
-      <span class="sb-label">Top Speed</span>
-      <span class="sb-value"><em>70</em> km/h</span>
-    </div>
-
-    <!-- image slot 4 -->
-    <div class="spec-img-gap"></div>
-
-    <div class="spec-bubble rv" style="--bx:14%">
-      <span class="sb-label">Charging</span>
-      <span class="sb-value">20–80% in <em>3–4</em> hrs</span>
-    </div>
-    <div class="spec-bubble rv" style="--bx:54%">
-      <span class="sb-label">Payload</span>
-      <span class="sb-value"><em>245</em> kg</span>
-    </div>
-
-    <!-- image slot 5 -->
-    <div class="spec-img-gap"></div>
-
-    <div class="spec-bubble rv" style="--bx:28%">
-      <span class="sb-label">Towing Capacity</span>
-      <span class="sb-value"><em>500</em> kg</span>
-    </div>
-
+  <!-- PAGE HEADER -->
+  <div class="specs-pg-head">
+    <div class="spec-eyebrow rv">— PERFORMANCE DATA —</div>
+    <h2 class="spec-title rv">TECHNICAL SPECIFICATIONS</h2>
   </div>
 
-  <p class="ts-footnote rv">* Values represent peak/estimated figures. Actual performance may vary by conditions.</p>
-
-  <!-- ── SPECS CTA ── -->
-  <div class="exp-cta">
-    <button onclick="navigateTo('pg-pilot')" class="cta-reserve rv">RESERVE YOUR EV² →</button>
+  <!-- SCENE 1: Any terrain — Powertrain + Drive -->
+  <div class="spec-scene">
+    <div class="scene-bg" style="background-image:url('ATV_realistic_3.png')"></div>
+    <div class="scene-overlay"></div>
+    <div class="scene-content">
+      <div class="sp" style="--sl:8%;--st:33%;--sd:0s">
+        <span class="sp-lbl">Powertrain</span>
+        <span class="sp-val">Fully Electric</span>
+      </div>
+      <div class="sp" style="--sl:58%;--st:54%;--sd:.22s">
+        <span class="sp-lbl">Drive</span>
+        <span class="sp-val">4×4 All-Wheel Drive</span>
+      </div>
+    </div>
   </div>
 
-</section>
+  <!-- SCENE 2: Desert — Peak Power + Peak Torque + Battery -->
+  <div class="spec-scene">
+    <div class="scene-bg" style="background-image:url('ATV_realistic_2.png')"></div>
+    <div class="scene-overlay"></div>
+    <div class="scene-content">
+      <div class="sp" style="--sl:7%;--st:26%;--sd:0s">
+        <span class="sp-lbl">Peak Power</span>
+        <span class="sp-val"><em>30</em> kW</span>
+      </div>
+      <div class="sp" style="--sl:60%;--st:44%;--sd:.2s">
+        <span class="sp-lbl">Peak Torque</span>
+        <span class="sp-val"><em>210</em> Nm</span>
+      </div>
+      <div class="sp" style="--sl:8%;--st:64%;--sd:.38s">
+        <span class="sp-lbl">Battery</span>
+        <span class="sp-val"><em>15.8</em> kWh LFP</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENE 3: Mountain — Range + Top Speed + Charging -->
+  <div class="spec-scene">
+    <div class="scene-bg" style="background-image:url('ATV_realistic_1.png')"></div>
+    <div class="scene-overlay"></div>
+    <div class="scene-content">
+      <div class="sp" style="--sl:8%;--st:30%;--sd:0s">
+        <span class="sp-lbl">Range</span>
+        <span class="sp-val"><em>120</em> km</span>
+      </div>
+      <div class="sp" style="--sl:62%;--st:48%;--sd:.2s">
+        <span class="sp-lbl">Top Speed</span>
+        <span class="sp-val"><em>70</em> km/h</span>
+      </div>
+      <div class="sp" style="--sl:9%;--st:66%;--sd:.38s">
+        <span class="sp-lbl">Charging</span>
+        <span class="sp-val">20–80% in <em>3–4</em> hrs</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM DATA ROW -->
+  <div class="spec-data-row rv">
+    <div class="sdr-item">
+      <div class="sdr-label">Payload</div>
+      <div class="sdr-val"><em>245</em> kg</div>
+    </div>
+    <div class="sdr-divider"></div>
+    <div class="sdr-item">
+      <div class="sdr-label">Towing Capacity</div>
+      <div class="sdr-val"><em>500</em> kg</div>
+    </div>
+  </div>
+
+  <p class="ts-footnote rv" style="text-align:center;padding:0 4rem 2rem">* Values represent peak/estimated figures. Actual performance may vary by conditions.</p>
+
+  <!-- CTA -->
+  <div class="exp-cta rv">
+    <button onclick="navigateTo('pg-pilot')" class="cta-reserve">RESERVE YOUR EV² →</button>
+  </div>
 
 </div><!-- /pg-specs -->
 
@@ -1596,6 +1583,32 @@ document.querySelectorAll('.page-panel').forEach(panel => {
       });
     });
   };
+})();
+
+/* ── SPECS PAGE: PARALLAX + REVEAL ── */
+(function(){
+  var sp = document.getElementById('pg-specs');
+  if (!sp) return;
+  var scenes = Array.prototype.slice.call(sp.querySelectorAll('.spec-scene'));
+  function tick() {
+    var st = sp.scrollTop, vh = sp.clientHeight;
+    scenes.forEach(function(scene) {
+      var bg = scene.querySelector('.scene-bg');
+      var sTop = scene.offsetTop, sH = scene.offsetHeight;
+      if (bg) bg.style.transform = 'translateY(' + (st - sTop) * 0.12 + 'px)';
+      if (st + vh > sTop + 80 && st < sTop + sH - 80) {
+        scene.querySelectorAll('.sp').forEach(function(p){ p.classList.add('on'); });
+      }
+    });
+  }
+  sp.addEventListener('scroll', tick, { passive: true });
+  /* also fire when pg-specs becomes active */
+  var _origNav = window.navigateTo;
+  window.navigateTo = function(id) {
+    _origNav(id);
+    if (id === 'pg-specs') setTimeout(tick, 750);
+  };
+  tick();
 })();
 
 /* ── PARALLAX PHOTOS (full-bleed experience rows) ── */
