@@ -362,23 +362,28 @@
       position:absolute; inset:0;
       background-size:cover; background-position:center;
     }
-    .bmw-frame {
-      position:absolute; inset:0; display:flex;
-      flex-direction:column; align-items:center; justify-content:center;
-    }
+    .bmw-frame { position:absolute; inset:0; }
+    .bmw-corner { position:absolute; }
+    .bmw-tl { top:6%; left:5%; }
+    .bmw-br { bottom:6%; right:5%; text-align:right; display:flex; flex-direction:column-reverse; }
     .bmw-number {
-      font-family:'Orbitron',monospace; font-size:22vw; font-weight:900;
+      font-family:'Orbitron',monospace; font-size:18vw; font-weight:900;
       color:transparent; -webkit-background-clip:text; background-clip:text;
       background-size:cover; background-position:center 40%;
-      transform-origin:center; letter-spacing:-.02em; line-height:.9;
+      letter-spacing:-.02em; line-height:.9;
       white-space:nowrap; will-change:transform; user-select:none;
+      display:block;
     }
+    .bmw-tl .bmw-number { transform-origin:top left; }
+    .bmw-br .bmw-number { transform-origin:bottom right; }
     .bmw-unit { font-size:.42em; letter-spacing:.06em; }
     .bmw-sub {
-      font-family:'Orbitron',monospace; font-size:.58rem; letter-spacing:.3em;
-      color:rgba(255,255,255,0); text-transform:uppercase; margin-top:2rem;
-      transition:color .5s ease;
+      font-family:'Orbitron',monospace; font-size:.55rem; letter-spacing:.28em;
+      color:rgba(255,255,255,0); text-transform:uppercase;
+      transition:color .5s ease; display:block;
     }
+    .bmw-tl .bmw-sub { margin-top:.9rem; }
+    .bmw-br .bmw-sub { margin-bottom:.9rem; }
     .bmw-frame.sub-on .bmw-sub { color:rgba(255,255,255,.55); }
     @media(max-width:900px) {
       .tech-specs { padding:4rem 1.5rem; }
@@ -1071,12 +1076,14 @@
     <div class="bmw-sticky">
       <div class="bmw-bg" id="bmwBg" style="background-image:url('ATV_realistic_3.png')"></div>
       <div class="bmw-frame" id="bmwF1">
-        <div class="bmw-number" id="bmwN1" style="background-image:url('ATV_realistic_3.png');transform:scale(.45)">210<span class="bmw-unit"> NM</span></div>
-        <div class="bmw-sub">PEAK TORQUE</div>
-      </div>
-      <div class="bmw-frame" id="bmwF2">
-        <div class="bmw-number" id="bmwN2" style="background-image:url('ATV_realistic_3.png');transform:scale(.45)">120<span class="bmw-unit"> KM</span></div>
-        <div class="bmw-sub">RANGE</div>
+        <div class="bmw-corner bmw-tl">
+          <div class="bmw-number" id="bmwN1" style="background-image:url('ATV_realistic_3.png');transform:scale(.3)">210<span class="bmw-unit"> NM</span></div>
+          <div class="bmw-sub">PEAK TORQUE</div>
+        </div>
+        <div class="bmw-corner bmw-br">
+          <div class="bmw-sub">RANGE</div>
+          <div class="bmw-number" id="bmwN2" style="background-image:url('ATV_realistic_3.png');transform:scale(.3)">120<span class="bmw-unit"> KM</span></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1618,30 +1625,24 @@ document.querySelectorAll('.page-panel').forEach(panel => {
   var scene = sp && sp.querySelector('.bmw-scene');
   if (!scene) return;
   var bg = document.getElementById('bmwBg');
-  var f1 = document.getElementById('bmwF1'), n1 = document.getElementById('bmwN1');
-  var f2 = document.getElementById('bmwF2'), n2 = document.getElementById('bmwN2');
+  var f1 = document.getElementById('bmwF1');
+  var n1 = document.getElementById('bmwN1'), n2 = document.getElementById('bmwN2');
   function update() {
     var sTop = scene.offsetTop;
     var travel = scene.offsetHeight - sp.clientHeight;
     if (travel <= 0) return;
     var p = Math.max(0, Math.min(1, (sp.scrollTop - sTop) / travel));
-    /* Start on clip-text spec, grow letters to reveal image through them */
-    bg.style.opacity = 0;
-    if (p < 0.44) {
-      var p1 = p / 0.44;
-      f1.style.opacity = 1; f2.style.opacity = 0;
-      n1.style.transform = 'scale(' + (.55 + p1 * 1.05) + ')';
-      f1.classList.toggle('sub-on', p1 > 0.25);
-      f1.classList.remove('sub-on2');
-    } else if (p < 0.52) {
-      var pc = (p - 0.44) / 0.08;
-      f1.style.opacity = 1 - pc; f2.style.opacity = pc;
-      n1.style.transform = 'scale(1.6)'; n2.style.transform = 'scale(.55)';
+    var sc = .3 + p * 1.5; /* both numbers grow together */
+    n1.style.transform = 'scale(' + sc + ')';
+    n2.style.transform = 'scale(' + sc + ')';
+    if (p < 0.62) {
+      bg.style.opacity = 0; f1.style.opacity = 1;
+      f1.classList.toggle('sub-on', p > 0.15);
     } else {
-      var p2 = (p - 0.52) / 0.48;
-      f1.style.opacity = 0; f2.style.opacity = 1;
-      n2.style.transform = 'scale(' + (.55 + p2 * 1.05) + ')';
-      f2.classList.toggle('sub-on', p2 > 0.25);
+      /* full image reveals as clip-text fades */
+      var pr = (p - 0.62) / 0.38;
+      bg.style.opacity = Math.min(1, pr * 1.6);
+      f1.style.opacity = Math.max(0, 1 - pr * 1.6);
     }
   }
   sp.addEventListener('scroll', update, { passive: true });
