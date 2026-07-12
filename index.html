@@ -352,6 +352,34 @@
       text-shadow:0 0 22px rgba(0,212,255,.5);
     }
     .sdr-divider { width:1px; height:3rem; background:rgba(255,255,255,.14); }
+    /* ── BMW CLIP-TEXT SCROLL ── */
+    .bmw-scene { position:relative; height:380vh; }
+    .bmw-sticky {
+      position:sticky; top:0; height:100vh;
+      overflow:hidden; background:#000;
+    }
+    .bmw-bg {
+      position:absolute; inset:0;
+      background-size:cover; background-position:center;
+    }
+    .bmw-frame {
+      position:absolute; inset:0; display:flex;
+      flex-direction:column; align-items:center; justify-content:center;
+    }
+    .bmw-number {
+      font-family:'Orbitron',monospace; font-size:22vw; font-weight:900;
+      color:transparent; -webkit-background-clip:text; background-clip:text;
+      background-size:cover; background-position:center 40%;
+      transform-origin:center; letter-spacing:-.02em; line-height:.9;
+      white-space:nowrap; will-change:transform; user-select:none;
+    }
+    .bmw-unit { font-size:.42em; letter-spacing:.06em; }
+    .bmw-sub {
+      font-family:'Orbitron',monospace; font-size:.58rem; letter-spacing:.3em;
+      color:rgba(255,255,255,0); text-transform:uppercase; margin-top:2rem;
+      transition:color .5s ease;
+    }
+    .bmw-frame.sub-on .bmw-sub { color:rgba(255,255,255,.55); }
     @media(max-width:900px) {
       .tech-specs { padding:4rem 1.5rem; }
       .ts-grid { grid-template-columns:repeat(2,1fr); }
@@ -1038,23 +1066,22 @@
     <h2 class="spec-title rv">TECHNICAL SPECIFICATIONS</h2>
   </div>
 
-  <!-- SCENE 1: Any terrain — Powertrain + Drive -->
-  <div class="spec-scene">
-    <div class="scene-bg" style="background-image:url('ATV_realistic_3.png')"></div>
-    <div class="scene-overlay"></div>
-    <div class="scene-content">
-      <div class="sp" style="--sl:8%;--st:33%;--sd:0s">
-        <span class="sp-lbl">Powertrain</span>
-        <span class="sp-val">Fully Electric</span>
+  <!-- BMW CLIP-TEXT SCROLL: 210 NM → 120 KM -->
+  <div class="bmw-scene">
+    <div class="bmw-sticky">
+      <div class="bmw-bg" id="bmwBg" style="background-image:url('ATV_realistic_3.png')"></div>
+      <div class="bmw-frame" id="bmwF1">
+        <div class="bmw-number" id="bmwN1" style="background-image:url('ATV_realistic_3.png');transform:scale(.45)">210<span class="bmw-unit"> NM</span></div>
+        <div class="bmw-sub">PEAK TORQUE</div>
       </div>
-      <div class="sp" style="--sl:58%;--st:54%;--sd:.22s">
-        <span class="sp-lbl">Drive</span>
-        <span class="sp-val">4×4 All-Wheel Drive</span>
+      <div class="bmw-frame" id="bmwF2">
+        <div class="bmw-number" id="bmwN2" style="background-image:url('ATV_realistic_3.png');transform:scale(.45)">120<span class="bmw-unit"> KM</span></div>
+        <div class="bmw-sub">RANGE</div>
       </div>
     </div>
   </div>
 
-  <!-- SCENE 2: Desert — Peak Power + Peak Torque + Battery -->
+  <!-- SCENE 2: Desert — Peak Power + Drive + Battery -->
   <div class="spec-scene">
     <div class="scene-bg" style="background-image:url('ATV_realistic_2.png')"></div>
     <div class="scene-overlay"></div>
@@ -1064,8 +1091,8 @@
         <span class="sp-val"><em>30</em> kW</span>
       </div>
       <div class="sp" style="--sl:60%;--st:44%;--sd:.2s">
-        <span class="sp-lbl">Peak Torque</span>
-        <span class="sp-val"><em>210</em> Nm</span>
+        <span class="sp-lbl">Drive</span>
+        <span class="sp-val">4×4 All-Wheel Drive</span>
       </div>
       <div class="sp" style="--sl:8%;--st:64%;--sd:.38s">
         <span class="sp-lbl">Battery</span>
@@ -1074,14 +1101,14 @@
     </div>
   </div>
 
-  <!-- SCENE 3: Mountain — Range + Top Speed + Charging -->
+  <!-- SCENE 3: Mountain — Powertrain + Top Speed + Charging -->
   <div class="spec-scene">
     <div class="scene-bg" style="background-image:url('ATV_realistic_1.png')"></div>
     <div class="scene-overlay"></div>
     <div class="scene-content">
       <div class="sp" style="--sl:8%;--st:30%;--sd:0s">
-        <span class="sp-lbl">Range</span>
-        <span class="sp-val"><em>120</em> km</span>
+        <span class="sp-lbl">Powertrain</span>
+        <span class="sp-val">Fully Electric</span>
       </div>
       <div class="sp" style="--sl:62%;--st:48%;--sd:.2s">
         <span class="sp-lbl">Top Speed</span>
@@ -1583,6 +1610,42 @@ document.querySelectorAll('.page-panel').forEach(panel => {
       });
     });
   };
+})();
+
+/* ── BMW CLIP-TEXT SCROLL ── */
+(function(){
+  var sp = document.getElementById('pg-specs');
+  var scene = sp && sp.querySelector('.bmw-scene');
+  if (!scene) return;
+  var bg = document.getElementById('bmwBg');
+  var f1 = document.getElementById('bmwF1'), n1 = document.getElementById('bmwN1');
+  var f2 = document.getElementById('bmwF2'), n2 = document.getElementById('bmwN2');
+  function update() {
+    var sTop = scene.offsetTop;
+    var travel = scene.offsetHeight - sp.clientHeight;
+    if (travel <= 0) return;
+    var p = Math.max(0, Math.min(1, (sp.scrollTop - sTop) / travel));
+    /* Start on clip-text spec, grow letters to reveal image through them */
+    bg.style.opacity = 0;
+    if (p < 0.44) {
+      var p1 = p / 0.44;
+      f1.style.opacity = 1; f2.style.opacity = 0;
+      n1.style.transform = 'scale(' + (.55 + p1 * 1.05) + ')';
+      f1.classList.toggle('sub-on', p1 > 0.25);
+      f1.classList.remove('sub-on2');
+    } else if (p < 0.52) {
+      var pc = (p - 0.44) / 0.08;
+      f1.style.opacity = 1 - pc; f2.style.opacity = pc;
+      n1.style.transform = 'scale(1.6)'; n2.style.transform = 'scale(.55)';
+    } else {
+      var p2 = (p - 0.52) / 0.48;
+      f1.style.opacity = 0; f2.style.opacity = 1;
+      n2.style.transform = 'scale(' + (.55 + p2 * 1.05) + ')';
+      f2.classList.toggle('sub-on', p2 > 0.25);
+    }
+  }
+  sp.addEventListener('scroll', update, { passive: true });
+  update();
 })();
 
 /* ── SPECS PAGE: PARALLAX + REVEAL ── */
