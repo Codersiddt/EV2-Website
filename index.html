@@ -1214,6 +1214,10 @@ function navigateTo(targetId) {
       unrevealed.forEach((el, i) => {
         setTimeout(() => el.classList.add('on'), 80 + i * 55);
       });
+      /* Trigger stat wheels when entering experience page */
+      if (targetId === 'pg-experience' && window.spinStatWheels) {
+        setTimeout(window.spinStatWheels, 120);
+      }
     }, 240);
   }, 680);
 }
@@ -1494,41 +1498,30 @@ document.querySelectorAll('.page-panel').forEach(panel => {
       col.className = 'slot-col';
       var strip = document.createElement('div');
       strip.className = 'slot-strip';
-      // Strip: 0–9 then the target digit — always 11 items, clean single roll
       var items = [0,1,2,3,4,5,6,7,8,9,d];
       items.forEach(function(n) {
         var s = document.createElement('span'); s.textContent = n; strip.appendChild(s);
       });
       col.appendChild(strip);
       el.appendChild(col);
-      // Each column gets a slightly longer duration so they settle one by one
       return { strip: strip, dur: 1.6 + i * 0.2 };
     });
   }
 
   var wheels = [buildWheel('statRange'), buildWheel('statTorque')];
 
-  function spinAll() {
+  window.spinStatWheels = function() {
     wheels.forEach(function(cols) {
       cols.forEach(function(col) {
-        var h = col.strip.parentElement.offsetHeight;
+        var h = col.strip.parentElement.offsetHeight || 88;
         col.strip.style.transition = 'none';
         col.strip.style.transform = 'translateY(0)';
-        void col.strip.offsetHeight; // force reflow
-        // Translate to the 11th item (index 10 = target digit)
+        void col.strip.offsetHeight;
         col.strip.style.transition = 'transform ' + col.dur + 's cubic-bezier(0.22,1,0.3,1)';
         col.strip.style.transform = 'translateY(-' + (10 * h) + 'px)';
       });
     });
-  }
-
-  var hero = document.querySelector('.stat-hero');
-  if (!hero) return;
-  var fired = false;
-  new IntersectionObserver(function(entries, obs) {
-    if (!entries[0].isIntersecting || fired) return;
-    fired = true; obs.disconnect(); spinAll();
-  }, { root: expPanel, threshold: 0.3 }).observe(hero);
+  };
 })();
 
 /* ── PARALLAX PHOTOS (full-bleed experience rows) ── */
