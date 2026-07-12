@@ -385,8 +385,11 @@
     .stat-num {
       font-family:'Barlow Condensed',sans-serif; font-size:clamp(5.5rem,11vw,10rem);
       font-weight:900; color:var(--white); line-height:1; letter-spacing:-.02em;
-      min-width:3ch; display:inline-block;
     }
+    .slot-wheel { display:inline-flex; gap:.04em; }
+    .slot-col   { overflow:hidden; height:1em; line-height:1; }
+    .slot-strip { display:flex; flex-direction:column; will-change:transform; }
+    .slot-strip span { display:block; height:1em; line-height:1; }
     .stat-cta-btn {
       margin-top:4rem; font-family:'Orbitron',monospace; font-size:.5rem;
       letter-spacing:.22em; color:var(--dim); background:rgba(255,255,255,.04);
@@ -773,11 +776,11 @@
     <div class="stat-hero-inner">
       <div class="stat-block">
         <div class="stat-meta">RANGE <span>KM</span></div>
-        <div class="stat-num" id="statRange">120</div>
+        <div class="stat-num"><div class="slot-wheel" id="statRange" data-val="120"></div></div>
       </div>
       <div class="stat-block">
         <div class="stat-meta">PEAK TORQUE <span>NM</span></div>
-        <div class="stat-num" id="statTorque">210</div>
+        <div class="stat-num"><div class="slot-wheel" id="statTorque" data-val="210"></div></div>
       </div>
     </div>
     <button class="stat-cta-btn" onclick="(function(){ var s=document.querySelector('.tech-specs'); var p=document.getElementById('pg-experience'); if(s&&p) p.scrollTop=s.offsetTop-80; })()">See full specifications</button>
@@ -1478,39 +1481,58 @@ document.querySelectorAll('.page-panel').forEach(panel => {
   });
 });
 
-/* ── STAT HERO SLOT ANIMATION ── */
+/* ── STAT HERO WHEEL ANIMATION ── */
 (function() {
-  var stats = [
-    { id: 'statRange',  target: 120 },
-    { id: 'statTorque', target: 210 }
-  ];
-  function slotSpin(el, target) {
-    var frames = 0, total = 32;
-    var iv = setInterval(function() {
-      frames++;
-      var t = frames / total;
-      if (t < 0.72) {
-        el.textContent = Math.floor(Math.random() * target * 1.6 + 10);
-      } else {
-        var ease = 1 - Math.pow(1 - (t - 0.72) / 0.28, 3);
-        el.textContent = Math.round(ease * target);
+  function buildWheel(id) {
+    var el = document.getElementById(id);
+    if (!el) return [];
+    var digits = el.dataset.val.split('');
+    el.innerHTML = '';
+    return digits.map(function(digit, i) {
+      var col = document.createElement('div');
+      col.className = 'slot-col';
+      var strip = document.createElement('div');
+      strip.className = 'slot-strip';
+      // 3+i full 0-9 cycles so later digits spin more, then land on target
+      var items = [];
+      for (var c = 0; c < 3 + i; c++) {
+        for (var d = 0; d <= 9; d++) items.push(d);
       }
-      if (frames >= total) { clearInterval(iv); el.textContent = target; }
-    }, 55);
+      items.push(parseInt(digit));
+      items.forEach(function(n) {
+        var s = document.createElement('span');
+        s.textContent = n;
+        strip.appendChild(s);
+      });
+      col.appendChild(strip);
+      el.appendChild(col);
+      return { strip: strip, count: items.length, dur: 1.3 + i * 0.25 };
+    });
   }
+
+  var wheels = [buildWheel('statRange'), buildWheel('statTorque')];
+
+  function spinAll() {
+    wheels.forEach(function(cols) {
+      cols.forEach(function(col) {
+        var h = col.strip.parentElement.offsetHeight;
+        col.strip.style.transition = 'none';
+        col.strip.style.transform = 'translateY(0)';
+        // force reflow so 'none' takes effect before we set the transition
+        void col.strip.offsetHeight;
+        col.strip.style.transition = 'transform ' + col.dur + 's cubic-bezier(0.08,1,0.18,1)';
+        col.strip.style.transform = 'translateY(-' + ((col.count - 1) * h) + 'px)';
+      });
+    });
+  }
+
   var hero = document.querySelector('.stat-hero');
   if (!hero) return;
   var fired = false;
-  var obs = new IntersectionObserver(function(entries) {
+  new IntersectionObserver(function(entries, obs) {
     if (!entries[0].isIntersecting || fired) return;
-    fired = true;
-    stats.forEach(function(s) {
-      var el = document.getElementById(s.id);
-      if (el) slotSpin(el, s.target);
-    });
-    obs.disconnect();
-  }, { root: expPanel, threshold: 0.3 });
-  obs.observe(hero);
+    fired = true; obs.disconnect(); spinAll();
+  }, { root: expPanel, threshold: 0.3 }).observe(hero);
 })();
 
 /* ── PARALLAX PHOTOS (full-bleed experience rows) ── */
