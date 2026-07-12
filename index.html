@@ -294,6 +294,37 @@
       margin-top:1.4rem; font-family:'Orbitron',monospace; font-size:.42rem;
       letter-spacing:.12em; color:var(--dim); opacity:.5;
     }
+    /* ── SCATTERED SPEC BUBBLES ── */
+    .specs-scatter {
+      display:flex; flex-direction:column; padding:0 0 4rem;
+    }
+    .spec-bubble {
+      position:relative; width:240px; margin-left:var(--bx,0); margin-bottom:2.8rem;
+      padding:1.4rem 1.8rem;
+      background:rgba(0,0,0,.45);
+      border:1px solid rgba(0,212,255,.2);
+      border-radius:3px;
+      box-shadow:0 0 28px rgba(0,212,255,.07), 0 0 0 .5px rgba(0,212,255,.06);
+      backdrop-filter:blur(6px);
+    }
+    .spec-bubble::before {
+      content:''; position:absolute; top:0; left:10%; right:10%; height:1px;
+      background:linear-gradient(90deg,transparent,rgba(0,212,255,.45),transparent);
+    }
+    .sb-label {
+      display:block; font-family:'Orbitron',monospace; font-size:.5rem;
+      letter-spacing:.22em; color:rgba(0,212,255,.6); text-transform:uppercase;
+      margin-bottom:.55rem;
+    }
+    .sb-value {
+      display:block; font-family:'Orbitron',monospace; font-size:.95rem;
+      color:rgba(255,255,255,.9); letter-spacing:.04em;
+    }
+    .sb-value em {
+      font-style:normal; color:var(--accent); font-size:1.3rem;
+      text-shadow:0 0 20px rgba(0,212,255,.6);
+    }
+    .spec-img-gap { height:16rem; }
     @media(max-width:900px) {
       .tech-specs { padding:4rem 1.5rem; }
       .ts-grid { grid-template-columns:repeat(2,1fr); }
@@ -974,56 +1005,77 @@
 ══════════════════════════════════ -->
 <div id="pg-specs" class="page-panel">
 
-<section id="specs" style="padding:6rem 4rem 4rem; max-width:1100px; margin:0 auto;">
+<section id="specs" style="padding:6rem 5rem 4rem;">
 
-  <!-- ── TECH SPECS ── -->
-  <div class="tech-specs rv">
-    <div class="spec-eyebrow">— PERFORMANCE DATA —</div>
-    <h2 class="spec-title">TECHNICAL SPECIFICATIONS</h2>
-    <div class="ts-grid">
-      <div class="ts-item">
-        <span class="ts-label">Powertrain</span>
-        <span class="ts-value">Fully Electric</span>
-      </div>
-      <div class="ts-item">
-        <span class="ts-label">Drive</span>
-        <span class="ts-value">4×4 All-Wheel Drive</span>
-      </div>
-      <div class="ts-item">
-        <span class="ts-label">Peak Power</span>
-        <span class="ts-value"><em>30</em> kW</span>
-      </div>
-      <div class="ts-item">
-        <span class="ts-label">Peak Torque</span>
-        <span class="ts-value"><em>210</em> Nm</span>
-      </div>
-      <div class="ts-item">
-        <span class="ts-label">Battery</span>
-        <span class="ts-value"><em>15.8</em> kWh LFP</span>
-      </div>
-      <div class="ts-item">
-        <span class="ts-label">Range</span>
-        <span class="ts-value"><em>120</em> km</span>
-      </div>
-      <div class="ts-item">
-        <span class="ts-label">Top Speed</span>
-        <span class="ts-value"><em>70</em> km/h</span>
-      </div>
-      <div class="ts-item">
-        <span class="ts-label">Charging</span>
-        <span class="ts-value">20–80% in <em>3–4</em> hrs</span>
-      </div>
-      <div class="ts-item">
-        <span class="ts-label">Payload</span>
-        <span class="ts-value"><em>245</em> kg</span>
-      </div>
-      <div class="ts-item">
-        <span class="ts-label">Towing Capacity</span>
-        <span class="ts-value"><em>500</em> kg</span>
-      </div>
+  <!-- ── TECH SPECS SCATTERED ── -->
+  <div class="spec-eyebrow rv">— PERFORMANCE DATA —</div>
+  <h2 class="spec-title rv" style="margin-bottom:0">TECHNICAL SPECIFICATIONS</h2>
+
+  <div class="specs-scatter">
+
+    <!-- image slot 1 -->
+    <div class="spec-img-gap"></div>
+
+    <div class="spec-bubble rv" style="--bx:8%">
+      <span class="sb-label">Powertrain</span>
+      <span class="sb-value">Fully Electric</span>
     </div>
-    <p class="ts-footnote">* Values represent peak/estimated figures. Actual performance may vary by conditions.</p>
+    <div class="spec-bubble rv" style="--bx:56%">
+      <span class="sb-label">Drive</span>
+      <span class="sb-value">4×4 All-Wheel Drive</span>
+    </div>
+
+    <!-- image slot 2 -->
+    <div class="spec-img-gap"></div>
+
+    <div class="spec-bubble rv" style="--bx:20%">
+      <span class="sb-label">Peak Power</span>
+      <span class="sb-value"><em>30</em> kW</span>
+    </div>
+    <div class="spec-bubble rv" style="--bx:60%">
+      <span class="sb-label">Peak Torque</span>
+      <span class="sb-value"><em>210</em> Nm</span>
+    </div>
+
+    <!-- image slot 3 -->
+    <div class="spec-img-gap"></div>
+
+    <div class="spec-bubble rv" style="--bx:5%">
+      <span class="sb-label">Battery</span>
+      <span class="sb-value"><em>15.8</em> kWh LFP</span>
+    </div>
+    <div class="spec-bubble rv" style="--bx:40%">
+      <span class="sb-label">Range</span>
+      <span class="sb-value"><em>120</em> km</span>
+    </div>
+    <div class="spec-bubble rv" style="--bx:66%">
+      <span class="sb-label">Top Speed</span>
+      <span class="sb-value"><em>70</em> km/h</span>
+    </div>
+
+    <!-- image slot 4 -->
+    <div class="spec-img-gap"></div>
+
+    <div class="spec-bubble rv" style="--bx:14%">
+      <span class="sb-label">Charging</span>
+      <span class="sb-value">20–80% in <em>3–4</em> hrs</span>
+    </div>
+    <div class="spec-bubble rv" style="--bx:54%">
+      <span class="sb-label">Payload</span>
+      <span class="sb-value"><em>245</em> kg</span>
+    </div>
+
+    <!-- image slot 5 -->
+    <div class="spec-img-gap"></div>
+
+    <div class="spec-bubble rv" style="--bx:28%">
+      <span class="sb-label">Towing Capacity</span>
+      <span class="sb-value"><em>500</em> kg</span>
+    </div>
+
   </div>
+
+  <p class="ts-footnote rv">* Values represent peak/estimated figures. Actual performance may vary by conditions.</p>
 
   <!-- ── SPECS CTA ── -->
   <div class="exp-cta">
