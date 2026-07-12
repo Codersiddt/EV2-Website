@@ -321,65 +321,51 @@
       font-weight:900; text-transform:uppercase; color:var(--white);
       letter-spacing:.04em; margin-bottom:3.5rem; line-height:1;
     }
-    /* systems counter */
-    .sys-header {
-      display:flex; align-items:baseline; gap:.35rem;
-      margin-bottom:2.8rem; padding-bottom:1.4rem;
-      border-bottom:1px solid rgba(0,212,255,.15);
+    .spec-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:0;
+      border:1px solid rgba(0,212,255,.1);
     }
-    .sys-count {
-      font-family:'Orbitron',monospace; font-size:2.8rem; font-weight:900;
-      color:var(--accent); line-height:1;
-      text-shadow:0 0 28px rgba(0,212,255,.7);
-    }
-    .sys-divider { font-family:'Orbitron',monospace; font-size:1.6rem; color:rgba(0,212,255,.28); margin:0 .15rem; }
-    .sys-total   { font-family:'Orbitron',monospace; font-size:1.6rem; color:rgba(255,255,255,.22); line-height:1; }
-    .sys-label   { font-family:'Orbitron',monospace; font-size:.44rem; letter-spacing:.28em; color:rgba(255,255,255,.32); margin-left:1.2rem; text-transform:uppercase; }
-
-    /* spec rows */
-    .spec-grid { display:flex; flex-direction:column; }
     .spec-item {
-      display:grid; grid-template-columns:1fr 180px auto;
-      align-items:center; gap:2.4rem;
-      padding:1.35rem 0; border-bottom:1px solid rgba(0,212,255,.06);
-      position:relative; transition:padding-left .22s ease;
+      display:flex; align-items:center; gap:1.2rem;
+      padding:1.35rem 2rem; border-bottom:1px solid rgba(0,212,255,.07);
+      border-right:1px solid rgba(0,212,255,.07);
+      transition:background .3s;
     }
-    .spec-item::after {
-      content:''; position:absolute; left:-5rem; top:0; bottom:0;
-      width:2px; background:var(--accent); box-shadow:0 0 8px var(--accent);
-      transform:scaleY(0); transform-origin:top; transition:transform .28s ease;
+    .spec-item:hover { background:rgba(0,212,255,.03); }
+    .spec-item:nth-child(even) { border-right:none; }
+    .spec-item:nth-last-child(-n+2) { border-bottom:none; }
+    .spec-dot {
+      width:7px; height:7px; border-radius:50%; flex-shrink:0;
+      background:var(--accent);
+      box-shadow:0 0 8px rgba(0,212,255,.9), 0 0 16px rgba(0,212,255,.4);
+      animation:spec-pulse 2.4s ease-in-out infinite;
     }
-    .spec-item:hover { padding-left:1rem; }
-    .spec-item:hover::after { transform:scaleY(1); }
-    .spec-item:last-child { border-bottom:none; }
+    @keyframes spec-pulse {
+      0%,100% { opacity:1; box-shadow:0 0 8px rgba(0,212,255,.9),0 0 16px rgba(0,212,255,.4); }
+      50%      { opacity:.5; box-shadow:0 0 4px rgba(0,212,255,.5),0 0 8px rgba(0,212,255,.2); }
+    }
+    .spec-item:nth-child(2) .spec-dot { animation-delay:.3s; }
+    .spec-item:nth-child(3) .spec-dot { animation-delay:.6s; }
+    .spec-item:nth-child(4) .spec-dot { animation-delay:.9s; }
+    .spec-item:nth-child(5) .spec-dot { animation-delay:1.2s; }
+    .spec-item:nth-child(6) .spec-dot { animation-delay:1.5s; }
+    .spec-item:nth-child(7) .spec-dot { animation-delay:1.8s; }
+    .spec-item:nth-child(8) .spec-dot { animation-delay:2.1s; }
     .spec-label {
-      font-family:'Barlow Condensed',sans-serif; font-size:1.32rem;
-      font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--white);
+      font-family:'Barlow Condensed',sans-serif; font-size:1.05rem;
+      font-weight:600; text-transform:uppercase; letter-spacing:.06em;
+      color:var(--white); flex:1;
     }
-    /* signal bar */
-    .spec-bar { height:2px; background:rgba(0,212,255,.08); position:relative; overflow:hidden; }
-    .spec-bar-fill {
-      position:absolute; top:0; left:0; height:100%;
-      width:0; transition:width 1.5s cubic-bezier(.22,1,.36,1);
-      box-shadow:0 0 10px currentColor;
-    }
-    .spec-item.bar-go .spec-bar-fill { width:var(--bw,100%); }
-    /* status badges */
     .spec-status {
-      font-family:'Orbitron',monospace; font-size:.4rem; letter-spacing:.18em;
-      white-space:nowrap; padding:.34rem .9rem;
-      border:1px solid currentColor; border-radius:2px;
+      font-family:'Orbitron',monospace; font-size:.42rem; letter-spacing:.18em;
+      color:var(--accent); opacity:.75; white-space:nowrap;
     }
-    .ss-cyan  { color:#00D4FF; text-shadow:0 0 10px rgba(0,212,255,.8);  box-shadow:inset 0 0 10px rgba(0,212,255,.12); }
-    .ss-green { color:#00ff88; text-shadow:0 0 10px rgba(0,255,136,.8);  box-shadow:inset 0 0 10px rgba(0,255,136,.12); animation:sg 2s ease-in-out infinite; }
-    .ss-blue  { color:#4488ff; text-shadow:0 0 10px rgba(68,136,255,.7); box-shadow:inset 0 0 10px rgba(68,136,255,.1); }
-    .ss-amber { color:#ff9900; text-shadow:0 0 10px rgba(255,153,0,.7);  box-shadow:inset 0 0 10px rgba(255,153,0,.1);  animation:sa 3s ease-in-out infinite; }
-    @keyframes sg { 0%,100%{opacity:1} 50%{opacity:.55} }
-    @keyframes sa { 0%,100%{opacity:1} 50%{opacity:.45} }
     @media(max-width:700px) {
       .spec-section { padding:4rem 1.5rem; }
-      .spec-item { grid-template-columns:1fr auto; }
-      .spec-bar  { display:none; }
+      .spec-grid { grid-template-columns:1fr; }
+      .spec-item:nth-child(even) { border-right:none; }
+      .spec-item:nth-last-child(-n+2) { border-bottom:1px solid rgba(0,212,255,.07); }
+      .spec-item:last-child { border-bottom:none; }
     }
 
     /* ─── PAGE 3: PILOT ─── */
@@ -966,52 +952,46 @@
   <div class="spec-section rv">
     <div class="spec-eyebrow">— SYSTEM OVERVIEW —</div>
     <h2 class="spec-title">PLATFORM<br>SPECIFICATIONS</h2>
-    <div class="spec-grid" id="specGrid">
-      <div class="sys-header">
-        <span class="sys-count">6</span>
-        <span class="sys-divider">/</span>
-        <span class="sys-total">8</span>
-        <span class="sys-label">Systems Operational</span>
-      </div>
-      <div class="spec-item rv">
+    <div class="spec-grid">
+      <div class="spec-item rvl">
+        <span class="spec-dot"></span>
         <span class="spec-label">Remote Operation</span>
-        <div class="spec-bar"><div class="spec-bar-fill ss-cyan" style="--bw:100%"></div></div>
-        <span class="spec-status ss-cyan">ENABLED</span>
+        <span class="spec-status">ENABLED</span>
       </div>
-      <div class="spec-item rv">
+      <div class="spec-item rvr">
+        <span class="spec-dot"></span>
         <span class="spec-label">Return-to-Base</span>
-        <div class="spec-bar"><div class="spec-bar-fill ss-cyan" style="--bw:93%"></div></div>
-        <span class="spec-status ss-cyan">ENABLED</span>
+        <span class="spec-status">ENABLED</span>
       </div>
-      <div class="spec-item rv">
+      <div class="spec-item rvl">
+        <span class="spec-dot"></span>
         <span class="spec-label">OTA Software Updates</span>
-        <div class="spec-bar"><div class="spec-bar-fill ss-green" style="--bw:100%"></div></div>
-        <span class="spec-status ss-green">LIVE</span>
+        <span class="spec-status">LIVE</span>
       </div>
-      <div class="spec-item rv">
+      <div class="spec-item rvr">
+        <span class="spec-dot"></span>
         <span class="spec-label">Mobile App Control</span>
-        <div class="spec-bar"><div class="spec-bar-fill ss-green" style="--bw:88%"></div></div>
-        <span class="spec-status ss-green">CONNECTED</span>
+        <span class="spec-status">CONNECTED</span>
       </div>
-      <div class="spec-item rv">
+      <div class="spec-item rvl">
+        <span class="spec-dot"></span>
         <span class="spec-label">Vehicle Diagnostics</span>
-        <div class="spec-bar"><div class="spec-bar-fill ss-cyan" style="--bw:100%"></div></div>
-        <span class="spec-status ss-cyan">ACTIVE</span>
+        <span class="spec-status">ACTIVE</span>
       </div>
-      <div class="spec-item rv">
+      <div class="spec-item rvr">
+        <span class="spec-dot"></span>
         <span class="spec-label">Fleet Management Ready</span>
-        <div class="spec-bar"><div class="spec-bar-fill ss-blue" style="--bw:78%"></div></div>
-        <span class="spec-status ss-blue">READY</span>
+        <span class="spec-status">READY</span>
       </div>
-      <div class="spec-item rv">
+      <div class="spec-item rvl">
+        <span class="spec-dot"></span>
         <span class="spec-label">Voice Ready</span>
-        <div class="spec-bar"><div class="spec-bar-fill ss-amber" style="--bw:52%"></div></div>
-        <span class="spec-status ss-amber">STANDBY</span>
+        <span class="spec-status">STANDBY</span>
       </div>
-      <div class="spec-item rv">
+      <div class="spec-item rvr">
+        <span class="spec-dot"></span>
         <span class="spec-label">Autonomous Ready</span>
-        <div class="spec-bar"><div class="spec-bar-fill ss-amber" style="--bw:40%"></div></div>
-        <span class="spec-status ss-amber">STANDBY</span>
+        <span class="spec-status">STANDBY</span>
       </div>
     </div>
   </div>
@@ -1449,21 +1429,6 @@ document.querySelectorAll('.page-panel').forEach(panel => {
     });
   });
 });
-
-/* ── SPEC BAR ANIMATION (trigger fills when grid scrolls into view) ── */
-(function() {
-  const grid = document.getElementById('specGrid');
-  if (!grid) return;
-  const trigger = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting) {
-      grid.querySelectorAll('.spec-item').forEach((el, i) => {
-        setTimeout(() => el.classList.add('bar-go'), i * 120);
-      });
-      trigger.disconnect();
-    }
-  }, { root: expPanel, threshold: 0.15 });
-  trigger.observe(grid);
-})();
 
 /* ── PARALLAX PHOTOS (full-bleed experience rows) ── */
 expPanel.addEventListener('scroll', () => {
