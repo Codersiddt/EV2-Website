@@ -495,6 +495,77 @@
       .spec-item:last-child { border-bottom:none; }
     }
 
+    /* ─── PLATFORM CAPABILITIES (Physical AI · Ground Operations) ─── */
+    .pcap-section {
+      padding:7rem 5rem; border-top:1px solid rgba(255,255,255,.05);
+      position:relative; overflow:hidden;
+    }
+    .pcap-section::before {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background:radial-gradient(ellipse 60% 60% at 50% 0%, rgba(0,212,255,.05) 0%, transparent 70%);
+    }
+    .pcap-eyebrow {
+      font-family:'Orbitron',monospace; font-size:.55rem; letter-spacing:.4em;
+      color:var(--accent); opacity:.75; margin-bottom:1rem;
+    }
+    .pcap-title {
+      font-family:'Barlow Condensed',sans-serif; font-size:clamp(2.6rem,6vw,5rem);
+      font-weight:900; text-transform:uppercase; color:var(--white);
+      line-height:.92; letter-spacing:.02em; margin-bottom:1.4rem;
+    }
+    .pcap-title sup { font-size:.35em; vertical-align:super; color:var(--accent); }
+    .pcap-lead {
+      font-size:.98rem; line-height:1.7; color:var(--dim);
+      max-width:600px; margin-bottom:3.5rem;
+    }
+    .pcap-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:0;
+      border:1px solid rgba(0,212,255,.1);
+    }
+    .pcap-item {
+      display:flex; align-items:center; gap:1.2rem;
+      padding:1.4rem 2rem; border-bottom:1px solid rgba(0,212,255,.07);
+      border-right:1px solid rgba(0,212,255,.07); transition:background .3s;
+    }
+    .pcap-item:hover { background:rgba(0,212,255,.03); }
+    .pcap-item:nth-child(even) { border-right:none; }
+    .pcap-item:nth-last-child(-n+2) { border-bottom:none; }
+    .pcap-dot {
+      width:7px; height:7px; border-radius:50%; flex-shrink:0;
+      background:var(--accent);
+      box-shadow:0 0 8px rgba(0,212,255,.9), 0 0 16px rgba(0,212,255,.4);
+      animation:spec-pulse 2.4s ease-in-out infinite;
+    }
+    .pcap-item:nth-child(2) .pcap-dot { animation-delay:.3s; }
+    .pcap-item:nth-child(3) .pcap-dot { animation-delay:.6s; }
+    .pcap-item:nth-child(4) .pcap-dot { animation-delay:.9s; }
+    .pcap-item:nth-child(5) .pcap-dot { animation-delay:1.2s; }
+    .pcap-item:nth-child(6) .pcap-dot { animation-delay:1.5s; }
+    .pcap-item:nth-child(7) .pcap-dot { animation-delay:1.8s; }
+    .pcap-item:nth-child(8) .pcap-dot { animation-delay:2.1s; }
+    .pcap-label {
+      font-family:'Barlow Condensed',sans-serif; font-size:1.1rem;
+      font-weight:600; text-transform:uppercase; letter-spacing:.05em;
+      color:var(--white); flex:1;
+    }
+    .pcap-status {
+      font-family:'Orbitron',monospace; font-size:.42rem; letter-spacing:.16em;
+      color:var(--accent); opacity:.75; white-space:nowrap;
+    }
+    .pcap-tagline {
+      margin-top:3rem; font-family:'Barlow Condensed',sans-serif;
+      font-size:clamp(1.4rem,2.6vw,2.2rem); font-weight:300; font-style:italic;
+      color:var(--white); line-height:1.3;
+    }
+    .pcap-tagline em { font-style:normal; color:var(--accent); font-weight:700; }
+    @media(max-width:700px) {
+      .pcap-section { padding:4rem 1.5rem; }
+      .pcap-grid { grid-template-columns:1fr; }
+      .pcap-item:nth-child(even) { border-right:none; }
+      .pcap-item:nth-last-child(-n+2) { border-bottom:1px solid rgba(0,212,255,.07); }
+      .pcap-item:last-child { border-bottom:none; }
+    }
+
     /* ─── STAT HERO ─── */
     .stat-hero {
       display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -1273,9 +1344,63 @@
     </div>
   </div>
 
+  <!-- ── PLATFORM CAPABILITIES · PHYSICAL AI FOR GROUND OPERATIONS ── -->
+  <div class="pcap-section">
+    <div class="pcap-eyebrow rv">— PHYSICAL AI FOR GROUND OPERATIONS —</div>
+    <h2 class="pcap-title rv">ONE PLATFORM.<br>MANY OPERATIONS.</h2>
+    <p class="pcap-lead rv">
+      Beyond the ride, the same EV<sup>2</sup> platform is built to automate repetitive Ground Operations — cutting operating costs and unlocking new revenue across resorts and industrial campuses.
+    </p>
+
+    <div class="pcap-grid rv">
+      <div class="pcap-item">
+        <span class="pcap-dot"></span>
+        <span class="pcap-label">Security Patrol</span>
+        <span class="pcap-status">RESORT · INDUSTRIAL</span>
+      </div>
+      <div class="pcap-item">
+        <span class="pcap-dot"></span>
+        <span class="pcap-label">Material &amp; Equipment Movement</span>
+        <span class="pcap-status">RESORT · INDUSTRIAL</span>
+      </div>
+      <div class="pcap-item">
+        <span class="pcap-dot"></span>
+        <span class="pcap-label">Guest &amp; Luggage Transport</span>
+        <span class="pcap-status">RESORT</span>
+      </div>
+      <div class="pcap-item">
+        <span class="pcap-dot"></span>
+        <span class="pcap-label">Housekeeping Logistics</span>
+        <span class="pcap-status">RESORT</span>
+      </div>
+      <div class="pcap-item">
+        <span class="pcap-dot"></span>
+        <span class="pcap-label">Maintenance Logistics</span>
+        <span class="pcap-status">RESORT · INDUSTRIAL</span>
+      </div>
+      <div class="pcap-item">
+        <span class="pcap-dot"></span>
+        <span class="pcap-label">Inspection</span>
+        <span class="pcap-status">INDUSTRIAL</span>
+      </div>
+      <div class="pcap-item">
+        <span class="pcap-dot"></span>
+        <span class="pcap-label">Fleet Operations</span>
+        <span class="pcap-status">INDUSTRIAL</span>
+      </div>
+      <div class="pcap-item">
+        <span class="pcap-dot"></span>
+        <span class="pcap-label">AI Adventure Experiences</span>
+        <span class="pcap-status">RESORT</span>
+      </div>
+    </div>
+
+    <p class="pcap-tagline rv">One intelligence platform. <em>Multiple ground operations.</em></p>
+  </div>
+
   <!-- ── EXPERIENCE → RESERVE CTA ── -->
   <div class="exp-cta">
-    <button onclick="navigateTo('pg-pilot')" class="cta-reserve rv">RESERVE YOUR EV² →</button>
+    <button onclick="navigateTo('pg-pilot')" class="cta-reserve rv">SIGN UP FOR THE PILOT PROGRAM →</button>
   </div>
 
 </section>
@@ -1379,7 +1504,7 @@
 
   <!-- CTA -->
   <div class="exp-cta rv">
-    <button onclick="navigateTo('pg-pilot')" class="cta-reserve">RESERVE YOUR EV² →</button>
+    <button onclick="navigateTo('pg-pilot')" class="cta-reserve">SIGN UP FOR THE PILOT PROGRAM →</button>
   </div>
 
 </div><!-- /pg-specs -->
@@ -1395,7 +1520,7 @@
 
   <div class="eyebrow rv">— LIMITED FIRST RUN —</div>
 
-  <h2 class="pilot-title rv">RESERVE YOUR EV²</h2>
+  <h2 class="pilot-title rv">JOIN THE PILOT PROGRAM</h2>
   <p class="pilot-sub rv">We're taking pre-orders now.</p>
 
   <p class="pilot-desc rv">
@@ -1464,7 +1589,7 @@
 
       </div>
 
-      <button type="submit" class="form-submit">RESERVE MY SPOT →</button>
+      <button type="submit" class="form-submit">SIGN UP FOR THE PILOT PROGRAM →</button>
     </form>
 
     <!-- Success message (shown after JS submit) -->
